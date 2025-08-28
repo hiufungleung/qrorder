@@ -50,6 +50,5 @@ COPY --from=builder --chown=appuser:appuser /app/package.json ./package.json
 
 USER appuser
 
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD curl -f http://localhost:${PORT}/api/health || curl -f http://localhost:${PORT}/ || exit 1
-EXPOSE ${PORT}
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD ["sh", "-c", "curl -f http://localhost:3000/api/health || curl -f http://localhost:3000/ || exit 1"]
 CMD ["node", "server.js"]

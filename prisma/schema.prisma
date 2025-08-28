@@ -12,22 +12,22 @@ model customisation_options {
   option_id              Int                      @id(map: "CUSTOMISATION_OPTIONS_pkey") @default(autoincrement())
   option_name            String                   @db.VarChar(255)
   restaurant_id          Int
-  restaurants            restaurants              @relation(fields: [restaurant_id], references: [restaurant_id], onDelete: Cascade, map: "CUSTOMISATION_OPTIONS_RestaurantID_fkey")
+  restaurants            restaurants              @relation(fields: [restaurant_id], references: [restaurant_id], onDelete: Cascade, map: "customisation_options_restaurant_id_fkey")
   dish_available_options dish_available_options[]
   option_values          option_values[]
 
-  @@unique([restaurant_id, option_name], map: "RestaurantIDOptionName")
+  @@unique([restaurant_id, option_name], map: "restaurant_id_option_name")
   @@schema("qrorder")
 }
 
 model dish_available_options {
   dish_id               Int
   option_id             Int
-  dishes                dishes                @relation(fields: [dish_id], references: [dish_id], onDelete: Cascade, map: "DISH_AVAILABLE_OPTIONS_DishID_fkey")
-  customisation_options customisation_options @relation(fields: [option_id], references: [option_id], onDelete: Cascade, map: "DISH_AVAILABLE_OPTIONS_OptionID_fkey")
+  dishes                dishes                @relation(fields: [dish_id], references: [dish_id], onDelete: Cascade, map: "dish_available_options_dish_id_fkey")
+  customisation_options customisation_options @relation(fields: [option_id], references: [option_id], onDelete: Cascade, map: "dish_available_options_option_id_fkey")
 
   @@id([dish_id, option_id], map: "DISH_AVAILABLE_OPTIONS_pkey")
-  @@index([option_id], map: "DISH_AVAILABLE_OPTIONS_OptionID_idx")
+  @@index([option_id], map: "dish_available_options_option_id_idx")
   @@schema("qrorder")
 }
 
@@ -35,24 +35,24 @@ model dish_categories {
   category_id   Int         @id(map: "DISH_CATEGORIES_pkey") @default(autoincrement())
   restaurant_id Int
   category_name String      @default("Uncategorised") @db.VarChar(255)
-  restaurants   restaurants @relation(fields: [restaurant_id], references: [restaurant_id], onDelete: Cascade, map: "DISH_CATEGORIES_RestaurantID_fkey")
+  restaurants   restaurants @relation(fields: [restaurant_id], references: [restaurant_id], onDelete: Cascade, map: "dish_categories_restaurant_id_fkey")
   dishes        dishes[]
 
-  @@unique([restaurant_id, category_name], map: "RestaurantIDCategoryName")
+  @@unique([restaurant_id, category_name], map: "restaurant_id_category_name")
   @@schema("qrorder")
 }
 
 model dishes {
   dish_id                Int                      @id(map: "DISHES_pkey") @default(autoincrement())
   category_id            Int
-  dish_name              String                   @unique(map: "DISHES_DishName_key") @db.VarChar(255)
+  dish_name              String                   @unique(map: "dishes_dish_name_key") @db.VarChar(255)
   description            String
   base_price             Decimal                  @db.Decimal(10, 2)
   dish_available_options dish_available_options[]
-  dish_categories        dish_categories          @relation(fields: [category_id], references: [category_id], onDelete: SetDefault, map: "DISHES_CategoryID_fkey")
+  dish_categories        dish_categories          @relation(fields: [category_id], references: [category_id], onDelete: SetDefault, map: "dishes_category_id_fkey")
   order_details          order_details[]
 
-  @@index([category_id], map: "DISHES_CategoryID_idx")
+  @@index([category_id], map: "dishes_category_id_idx")
   @@schema("qrorder")
 }
 
@@ -61,21 +61,21 @@ model option_values {
   option_id                          Int
   value_name                         String                               @db.VarChar(255)
   extra_price                        Decimal                              @db.Decimal(10, 2)
-  customisation_options              customisation_options                @relation(fields: [option_id], references: [option_id], onDelete: Cascade, map: "OPTION_VALUES_OptionID_fkey")
+  customisation_options              customisation_options                @relation(fields: [option_id], references: [option_id], onDelete: Cascade, map: "option_values_option_id_fkey")
   order_detail_customisation_options order_detail_customisation_options[]
 
-  @@unique([option_id, value_name], map: "OptionIDValueName")
+  @@unique([option_id, value_name], map: "option_id_value_name")
   @@schema("qrorder")
 }
 
 model order_detail_customisation_options {
   value_id        Int
   order_detail_id Int
-  order_details   order_details @relation(fields: [order_detail_id], references: [order_detail_id], onDelete: Cascade, map: "ORDER_DETAIL_CUSTOMISATION_OPTIONS_OrderDetailID_fkey")
-  option_values   option_values @relation(fields: [value_id], references: [value_id], onDelete: Cascade, map: "ORDER_DETAIL_CUSTOMISATION_OPTIONS_ValueID_fkey")
+  order_details   order_details @relation(fields: [order_detail_id], references: [order_detail_id], onDelete: Cascade, map: "order_detail_customisation_options_order_detail_id_fkey")
+  option_values   option_values @relation(fields: [value_id], references: [value_id], onDelete: Cascade, map: "order_detail_customisation_options_value_id_fkey")
 
   @@id([value_id, order_detail_id], map: "ORDER_DETAIL_CUSTOMISATION_OPTIONS_pkey")
-  @@index([order_detail_id], map: "ORDER_DETAIL_CUSTOMISATION_OPTIONS_OrderDetailID_idx")
+  @@index([order_detail_id], map: "order_detail_customisation_options_order_detail_id_idx")
   @@schema("qrorder")
 }
 
@@ -85,11 +85,11 @@ model order_details {
   dish_id                            Int
   quantity                           Int
   order_detail_customisation_options order_detail_customisation_options[]
-  dishes                             dishes                               @relation(fields: [dish_id], references: [dish_id], map: "ORDER_DETAILS_DishID_fkey")
-  orders                             orders                               @relation(fields: [order_id], references: [order_id], onDelete: Cascade, map: "ORDER_DETAILS_OrderID_fkey")
+  dishes                             dishes                               @relation(fields: [dish_id], references: [dish_id], map: "order_details_dish_id_fkey")
+  orders                             orders                               @relation(fields: [order_id], references: [order_id], onDelete: Cascade, map: "order_details_order_id_fkey")
 
-  @@unique([order_id, order_detail_id, dish_id], map: "OrderIDOrderDetailIDDishID")
-  @@index([dish_id], map: "ORDER_DETAILS_DishID_idx")
+  @@unique([order_id, order_detail_id, dish_id], map: "order_id_order_detail_id_dish_id")
+  @@index([dish_id], map: "order_details_dish_id_idx")
   @@schema("qrorder")
 }
 
@@ -104,19 +104,19 @@ model orders {
   comment       String?
   status        order_status    @default(Pending)
   order_details order_details[]
-  restaurants   restaurants     @relation(fields: [restaurant_id], references: [restaurant_id], onDelete: Cascade, map: "ORDERS_RestaurantID_fkey")
-  tables        tables          @relation(fields: [table_id], references: [table_id], map: "ORDERS_TableID_fkey")
+  restaurants   restaurants     @relation(fields: [restaurant_id], references: [restaurant_id], onDelete: Cascade, map: "orders_restaurant_id_fkey")
+  tables        tables          @relation(fields: [table_id], references: [table_id], map: "orders_table_id_fkey")
 
-  @@unique([restaurant_id, order_number], map: "RestaurantIDOrderNumber")
-  @@index([table_id], map: "ORDERS_TableID_idx")
+  @@unique([restaurant_id, order_number], map: "restaurant_id_order_number")
+  @@index([table_id], map: "orders_table_id_idx")
   @@schema("qrorder")
 }
 
 model restaurants {
   restaurant_id         Int                     @id(map: "RESTAURANTS_pkey") @default(autoincrement())
-  name                  String                  @unique(map: "RESTAURANTS_Name_key") @db.VarChar(255)
-  email                 String                  @unique(map: "RESTAURANTS_Email_key") @db.VarChar(255)
-  phone                 String                  @unique(map: "RESTAURANTS_Phone_key") @db.VarChar(255)
+  name                  String                  @unique(map: "restaurants_name_key") @db.VarChar(255)
+  email                 String                  @unique(map: "restaurants_email_key") @db.VarChar(255)
+  phone                 String                  @unique(map: "restaurants_phone_key") @db.VarChar(255)
   address               String                  @db.VarChar(255)
   password              String                  @db.VarChar(255)
   is_admin              Boolean                 @default(false)
@@ -135,9 +135,9 @@ model tables {
   table_number  String      @db.VarChar(16)
   capacity      Int
   orders        orders[]
-  restaurants   restaurants @relation(fields: [restaurant_id], references: [restaurant_id], onDelete: Cascade, map: "TABLES_RestaurantID_fkey")
+  restaurants   restaurants @relation(fields: [restaurant_id], references: [restaurant_id], onDelete: Cascade, map: "tables_restaurant_id_fkey")
 
-  @@unique([restaurant_id, table_number], map: "RestaurantIDTableNumber")
+  @@unique([restaurant_id, table_number], map: "restaurant_id_table_number")
   @@schema("qrorder")
 }
 
