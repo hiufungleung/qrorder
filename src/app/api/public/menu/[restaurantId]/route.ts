@@ -15,9 +15,9 @@ export async function GET(
 
     // Get restaurant info
     const restaurant = await prisma.restaurants.findUnique({
-      where: { restaurant_id: restaurantId },
+      where: { id: restaurantId },
       select: {
-        restaurant_id: true,
+        id: true,
         name: true,
         address: true,
       }
@@ -62,18 +62,18 @@ export async function GET(
 
     // Transform data for menu display
     const menuCategories = categories.map(category => ({
-      id: category.category_id,
+      id: category.id,
       category_name: category.category_name,
       dishes: category.dishes.map(dish => ({
-        id: dish.dish_id,
+        id: dish.id,
         dish_name: dish.dish_name,
         description: dish.description,
         base_price: Number(dish.base_price),
         availableOptions: dish.dish_available_options.map(da => ({
-          id: da.customisation_options.option_id,
+          id: da.customisation_options.id,
           option_name: da.customisation_options.option_name,
           values: da.customisation_options.option_values.map(value => ({
-            id: value.value_id,
+            id: value.id,
             value_name: value.value_name,
             extra_price: Number(value.extra_price)
           }))
@@ -86,7 +86,7 @@ export async function GET(
       message: 'Menu retrieved successfully',
       data: {
         restaurant: {
-          id: restaurant.restaurant_id,
+          id: restaurant.id,
           name: restaurant.name,
           address: restaurant.address
         },

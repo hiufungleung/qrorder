@@ -19,9 +19,9 @@ export async function POST(request: NextRequest) {
     
     const dishPrices = await Promise.all(
       dishes.map(async (cartItem: any) => {
-        const dish = await prisma.dish.findUnique({
+        const dish = await prisma.dishes.findUnique({
           where: { id: cartItem.dishId },
-          select: { basePrice: true }
+          select: { base_price: true }
         })
         
         if (!dish) {
@@ -31,19 +31,19 @@ export async function POST(request: NextRequest) {
         // Calculate option prices
         let optionPrice = 0
         if (cartItem.selectedValuesId && cartItem.selectedValuesId.length > 0) {
-          const optionValues = await prisma.optionValue.findMany({
+          const optionValues = await prisma.option_values.findMany({
             where: {
               id: {
                 in: cartItem.selectedValuesId
               }
             },
-            select: { extraPrice: true }
+            select: { extra_price: true }
           })
           
-          optionPrice = optionValues.reduce((sum, value) => sum + Number(value.extraPrice), 0)
+          optionPrice = optionValues.reduce((sum, value) => sum + Number(value.extra_price), 0)
         }
 
-        const unitPrice = Number(dish.basePrice) + optionPrice
+        const unitPrice = Number(dish.base_price) + optionPrice
         const itemTotal = unitPrice * cartItem.quantity
         totalPrice += itemTotal
 
@@ -58,41 +58,41 @@ export async function POST(request: NextRequest) {
     // Create order with transaction
     const result = await prisma.$transaction(async (tx) => {
       // Get next order number for this restaurant
-      const lastOrder = await tx.order.findFirst({
-        where: { restaurantId },
-        orderBy: { orderNumber: 'desc' }
+      const lastOrder = await tx.orders.findFirst({
+        where: { restaurant_id: restaurantId },
+        orderBy: { order_number: 'desc' }
       })
       
-      const nextOrderNumber = (lastOrder?.orderNumber || 0) + 1
+      const nextOrderNumber = (lastOrder?.order_number || 0) + 1
 
       // Create the order
-      const order = await tx.order.create({
+      const order = await tx.orders.create({
         data: {
-          restaurantId,
-          orderNumber: nextOrderNumber,
-          customerName,
-          totalPrice,
-          tableId,
+          restaurant_id: restaurantId,
+          order_number: nextOrderNumber,
+          customer_name: customerName,
+          total_price: totalPrice,
+          table_id: tableId,
           comment,
         },
       })
 
       // Create order details
       for (const dishPrice of dishPrices) {
-        const orderDetail = await tx.orderDetail.create({
+        const orderDetail = await tx.order_details.create({
           data: {
-            orderId: order.id,
-            dishId: dishPrice.dishId,
+            order_id: order.id,
+            dish_id: dishPrice.dishId,
             quantity: dishPrice.quantity,
           },
         })
 
         // Add customisation options if any
         if (dishPrice.selectedValuesId && dishPrice.selectedValuesId.length > 0) {
-          await tx.orderDetailCustomisationOption.createMany({
+          await tx.order_detail_customisation_options.createMany({
             data: dishPrice.selectedValuesId.map((valueId: number) => ({
-              orderDetailId: orderDetail.id,
-              valueId,
+              order_detail_id: orderDetail.id,
+              value_id: valueId,
             })),
           })
         }
@@ -106,9 +106,9 @@ export async function POST(request: NextRequest) {
       message: 'Order created successfully',
       data: {
         orderId: result.id,
-        orderNumber: result.orderNumber,
-        restaurantId: result.restaurantId,
-        totalPrice: Number(result.totalPrice)
+        orderNumber: result.order_number,
+        restaurantId: result.restaurant_id,
+        totalPrice: Number(result.total_price)
       }
     })
   } catch (error) {
@@ -133,36 +133,36 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const order = await prisma.order.findFirst({
+    const order = await prisma.orders.findFirst({
       where: {
-        restaurantId: parseInt(restaurantId),
-        orderNumber: parseInt(orderNumber)
+        restaurant_id: parseInt(restaurantId),
+        order_number: parseInt(orderNumber)
       },
       include: {
-        restaurant: {
+        restaurants: {
           select: {
             name: true
           }
         },
-        table: {
+        tables: {
           select: {
-            tableNumber: true
+            table_number: true
           }
         },
-        orderDetails: {
+        order_details: {
           include: {
-            dish: {
+            dishes: {
               select: {
-                dishName: true,
-                basePrice: true
+                dish_name: true,
+                base_price: true
               }
             },
-            orderDetailCustomisationOptions: {
+            order_detail_customisation_options: {
               include: {
-                value: {
+                option_values: {
                   select: {
-                    valueName: true,
-                    extraPrice: true
+                    value_name: true,
+                    extra_price: true
                   }
                 }
               }
@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
       message: 'Order retrieved successfully',
       data: {
         ...order,
-        totalPrice: Number(order.totalPrice)
+        totalPrice: Number(order.total_price)
       }
     })
   } catch (error) {

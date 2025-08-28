@@ -51,6 +51,12 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  events: {
+    async signOut() {
+      // Clean up any additional session data here if needed
+    },
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -71,6 +77,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/auth/login",
+    signOut: "/auth/login"
   },
 }
 

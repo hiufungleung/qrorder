@@ -15,48 +15,48 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const order = await prisma.order.findFirst({
+    const order = await prisma.orders.findFirst({
       where: {
-        restaurantId: parseInt(restaurantId),
-        orderNumber: parseInt(orderNumber)
+        restaurant_id: parseInt(restaurantId),
+        order_number: parseInt(orderNumber)
       },
       select: {
         id: true,
-        orderNumber: true,
-        customerName: true,
-        totalPrice: true,
-        orderTime: true,
+        order_number: true,
+        customer_name: true,
+        total_price: true,
+        order_time: true,
         status: true,
         comment: true,
-        restaurant: {
+        restaurants: {
           select: {
             name: true
           }
         },
-        table: {
+        tables: {
           select: {
-            tableNumber: true
+            table_number: true
           }
         },
-        orderDetails: {
+        order_details: {
           select: {
             id: true,
             quantity: true,
-            dish: {
+            dishes: {
               select: {
-                dishName: true,
-                basePrice: true
+                dish_name: true,
+                base_price: true
               }
             },
-            orderDetailCustomisationOptions: {
+            order_detail_customisation_options: {
               select: {
-                value: {
+                option_values: {
                   select: {
-                    valueName: true,
-                    extraPrice: true,
-                    option: {
+                    value_name: true,
+                    extra_price: true,
+                    customisation_options: {
                       select: {
-                        optionName: true
+                        option_name: true
                       }
                     }
                   }

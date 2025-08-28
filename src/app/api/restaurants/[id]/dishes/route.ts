@@ -101,7 +101,7 @@ export async function POST(
     }
 
     const body = await request.json()
-    const { dish_name: dishName, description, basePrice, categoryId, selectedOptions } = body
+    const { dishName, description, basePrice, categoryId, selectedOptions } = body
 
     if (!dishName || !description || !basePrice || !categoryId) {
       return NextResponse.json(
@@ -143,7 +143,7 @@ export async function POST(
             tx.dish_available_options.create({
               data: {
                 dish_id: dish.id,
-                option_id: optionId,
+                option_id: option_id,
               },
             })
           )
@@ -201,7 +201,7 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { dishId, dish_name: dishName, description, basePrice, categoryId, selectedOptions } = body
+    const { dishId, dishName, description, basePrice, categoryId, selectedOptions } = body
 
     if (!dishId || !dishName || !description || !basePrice || !categoryId) {
       return NextResponse.json(
@@ -244,7 +244,7 @@ export async function PUT(
 
     // Update dish with available options in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      const dish = await tx.dish.update({
+      const dish = await tx.dishes.update({
         where: { id: parseInt(dishId) },
         data: {
           dish_name: dishName,
@@ -266,7 +266,7 @@ export async function PUT(
             tx.dish_available_options.create({
               data: {
                 dish_id: dish.id,
-                option_id: optionId,
+                option_id: option_id,
               },
             })
           )
@@ -355,7 +355,7 @@ export async function DELETE(
       await tx.dish_available_options.deleteMany({
         where: { dish_id: parseInt(dishId) }
       })
-      await tx.dish.delete({
+      await tx.dishes.delete({
         where: { id: parseInt(dishId) }
       })
     })

@@ -213,7 +213,7 @@ export default function SignUpPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2" suppressHydrationWarning>
                   <label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Email Address *
                   </label>
@@ -227,6 +227,7 @@ export default function SignUpPage() {
                     required
                     disabled={isLoading}
                     className="rounded-xl border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    suppressHydrationWarning
                   />
                 </div>
               </div>
@@ -387,7 +388,7 @@ export default function SignUpPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+                <div className="space-y-2" suppressHydrationWarning>
                   <label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Password *
                   </label>
@@ -401,10 +402,11 @@ export default function SignUpPage() {
                     required
                     disabled={isLoading}
                     className="rounded-xl border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    suppressHydrationWarning
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2" suppressHydrationWarning>
                   <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Confirm Password *
                   </label>
@@ -418,6 +420,7 @@ export default function SignUpPage() {
                     required
                     disabled={isLoading}
                     className="rounded-xl border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    suppressHydrationWarning
                   />
                 </div>
               </div>

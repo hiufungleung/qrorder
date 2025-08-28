@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       data: {
         table_number: 'Table 1',
         capacity: 4,
-        restaurant_id: newRestaurant.restaurant_id
+        restaurant_id: newRestaurant.id
       }
     })
 

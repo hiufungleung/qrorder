@@ -38,7 +38,7 @@ export default function LoginPage() {
         if (session?.user.isAdmin) {
           router.push('/admin')
         } else if (session?.user.restaurantId) {
-          router.push(`/restaurant/${session.user.restaurantId}`)
+          router.push('/restaurant')
         } else {
           router.push(callbackUrl)
         }
@@ -82,7 +82,7 @@ export default function LoginPage() {
                 </div>
               )}
               
-              <div className="space-y-2">
+              <div className="space-y-2" suppressHydrationWarning>
                 <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                   Email
                 </label>
@@ -94,10 +94,11 @@ export default function LoginPage() {
                   placeholder="Enter your email"
                   required
                   disabled={isLoading}
+                  suppressHydrationWarning
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2" suppressHydrationWarning>
                 <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                   Password
                 </label>
@@ -109,6 +110,7 @@ export default function LoginPage() {
                   placeholder="Enter your password"
                   required
                   disabled={isLoading}
+                  suppressHydrationWarning
                 />
               </div>
             </CardContent>

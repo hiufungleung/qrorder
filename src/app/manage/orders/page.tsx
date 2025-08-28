@@ -18,17 +18,20 @@ interface Order {
   order_time: string
   status: string
   comment?: string
-  table: {
+  tables?: {
     table_number: string
-  }
-  orderDetails: {
+  } | null
+  table?: {
+    table_number: string
+  } | null
+  order_details: {
     quantity: number
-    dish: {
+    dishes: {
       dish_name: string
       base_price: number
     }
-    orderDetailCustomisationOptions: {
-      value: {
+    order_detail_customisation_options: {
+      option_values: {
         value_name: string
         extra_price: number
       }
@@ -144,10 +147,10 @@ export default function RestaurantOrders() {
     )
   }
 
-  const calculateItemTotal = (detail: Order['orderDetails'][0]) => {
-    const basePrice = detail.dish.base_price
-    const customizationTotal = detail.orderDetailCustomisationOptions.reduce(
-      (sum, option) => sum + Number(option.value.extra_price),
+  const calculateItemTotal = (detail: Order['order_details'][0]) => {
+    const basePrice = detail.dishes.base_price
+    const customizationTotal = detail.order_detail_customisation_options.reduce(
+      (sum, option) => sum + Number(option.option_values.extra_price),
       0
     )
     return (Number(basePrice) + customizationTotal) * detail.quantity
@@ -176,7 +179,7 @@ export default function RestaurantOrders() {
     return (
       <SessionRestaurantLayout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-red-600">Error</h2>
+          <h2 className="text-2xl font-bold text-red-600 dark:text-red-400">Error</h2>
           <p className="text-gray-600 dark:text-gray-400 mt-2">{error}</p>
           <Button onClick={() => fetchOrders()} className="mt-4">
             Try Again
@@ -221,7 +224,7 @@ export default function RestaurantOrders() {
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Completed Today</CardDescription>
-              <CardTitle className="text-2xl text-green-600">
+              <CardTitle className="text-2xl text-green-600 dark:text-green-400">
                 {orders.filter(o => o.status === 'Completed').length}
               </CardTitle>
             </CardHeader>
@@ -229,7 +232,7 @@ export default function RestaurantOrders() {
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Total Revenue</CardDescription>
-              <CardTitle className="text-2xl text-indigo-600">
+              <CardTitle className="text-2xl text-indigo-600 dark:text-indigo-400">
                 A${orders.reduce((sum, order) => sum + Number(order.total_price), 0).toFixed(2)}
               </CardTitle>
             </CardHeader>
@@ -266,7 +269,7 @@ export default function RestaurantOrders() {
                     <TableRow key={order.id}>
                       <TableCell className="font-medium">#{order.order_number}</TableCell>
                       <TableCell>{order.customer_name}</TableCell>
-                      <TableCell>{order.table.table_number}</TableCell>
+                      <TableCell>{order.tables?.table_number || order.table?.table_number || 'N/A'}</TableCell>
                       <TableCell>
                         <Button 
                           variant="outline" 
@@ -338,7 +341,7 @@ export default function RestaurantOrders() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm text-gray-600 dark:text-gray-400">Table</h3>
-                    <p className="font-medium">{selectedOrder.table.table_number}</p>
+                    <p className="font-medium">{selectedOrder.tables?.table_number || selectedOrder.table?.table_number || 'N/A'}</p>
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm text-gray-600 dark:text-gray-400">Order Time</h3>
@@ -364,24 +367,24 @@ export default function RestaurantOrders() {
                 <div>
                   <h3 className="font-semibold text-sm text-gray-600 dark:text-gray-400 mb-3">Order Items</h3>
                   <div className="space-y-4">
-                    {selectedOrder.orderDetails.map((detail, index) => (
+                    {selectedOrder.order_details.map((detail, index) => (
                       <div key={index} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <h4 className="font-medium">{detail.quantity}x {detail.dish.dish_name}</h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Base price: A${Number(detail.dish.base_price).toFixed(2)} each</p>
+                            <h4 className="font-medium">{detail.quantity}x {detail.dishes.dish_name}</h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Base price: A${Number(detail.dishes.base_price).toFixed(2)} each</p>
                           </div>
                         </div>
                         
                         {/* Customizations */}
-                        {detail.orderDetailCustomisationOptions.length > 0 && (
+                        {detail.order_detail_customisation_options.length > 0 && (
                           <div className="mt-3">
                             <h5 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">Customizations:</h5>
                             <div className="space-y-1">
-                              {detail.orderDetailCustomisationOptions.map((option, optionIndex) => (
+                              {detail.order_detail_customisation_options.map((option, optionIndex) => (
                                 <div key={optionIndex} className="flex justify-between text-sm">
-                                  <span className="text-gray-600 dark:text-gray-400">+ {option.value.value_name}</span>
-                                  <span className="font-medium">A${Number(option.value.extra_price).toFixed(2)}</span>
+                                  <span className="text-gray-600 dark:text-gray-400">+ {option.option_values.value_name}</span>
+                                  <span className="font-medium">A${Number(option.option_values.extra_price).toFixed(2)}</span>
                                 </div>
                               ))}
                             </div>

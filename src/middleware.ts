@@ -11,26 +11,14 @@ export default withAuth(
     if (req.nextUrl.pathname.startsWith("/admin")) {
       if (!isAdmin) {
         const redirectUrl = restaurantId 
-          ? `/restaurant/${restaurantId}` 
+          ? '/restaurant' 
           : '/auth/login'
         return NextResponse.redirect(new URL(redirectUrl, req.url))
       }
     }
 
-    // Restaurant routes - check access permissions
-    if (req.nextUrl.pathname.startsWith("/restaurant/")) {
-      const pathRestaurantId = parseInt(
-        req.nextUrl.pathname.split("/")[2]
-      )
-      
-      // Non-admin users can only access their own restaurant
-      if (!isAdmin && restaurantId !== pathRestaurantId) {
-        const redirectUrl = restaurantId 
-          ? `/restaurant/${restaurantId}` 
-          : '/auth/login'
-        return NextResponse.redirect(new URL(redirectUrl, req.url))
-      }
-    }
+    // Restaurant routes - now using query parameters instead of path parameters
+    // The old /restaurant/[id] routes no longer exist, so we don't need this middleware section
 
     // Management routes - accessible to authenticated users (admins can access via query params)
     if (req.nextUrl.pathname.startsWith("/manage/")) {
@@ -40,7 +28,7 @@ export default withAuth(
       
       if (!isAdmin && queryRestaurantId && parseInt(queryRestaurantId) !== restaurantId) {
         const redirectUrl = restaurantId 
-          ? `/restaurant/${restaurantId}` 
+          ? '/restaurant' 
           : '/restaurant'
         return NextResponse.redirect(new URL(redirectUrl, req.url))
       }
@@ -54,7 +42,7 @@ export default withAuth(
         // Check if user is authenticated for protected routes
         if (
           req.nextUrl.pathname.startsWith("/admin") ||
-          req.nextUrl.pathname.startsWith("/restaurant") ||
+          req.nextUrl.pathname === "/restaurant" ||
           req.nextUrl.pathname.startsWith("/manage")
         ) {
           return !!token
@@ -66,5 +54,5 @@ export default withAuth(
 )
 
 export const config = {
-  matcher: ["/admin/:path*", "/restaurant/:path*", "/manage/:path*"]
+  matcher: ["/admin/:path*", "/restaurant", "/manage/:path*"]
 }

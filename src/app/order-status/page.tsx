@@ -82,28 +82,57 @@ export default function OrderStatusPage() {
     return new Date(date).toLocaleString()
   }
 
-  const formatOrderItems = (orderDetails: any[]) => {
-    return orderDetails.map((detail, index) => {
-      const customOptions = detail.orderDetailCustomisationOptions
-        ?.map((option: any) => option.value.value_name)
-        .filter((name: string) => !name.includes('Regular'))
-        .join(', ')
+  const calculateItemTotal = (detail: any) => {
+    const basePrice = detail.dishes.base_price
+    const customizationTotal = detail.order_detail_customisation_options.reduce(
+      (sum: number, option: any) => sum + Number(option.option_values.extra_price),
+      0
+    )
+    return (Number(basePrice) + customizationTotal) * detail.quantity
+  }
 
-      return (
-        <div key={index} className="flex justify-between items-start border-b pb-2 last:border-b-0">
-          <div>
-            <p className="font-medium">{detail.dish.dish_name}</p>
-            {customOptions && (
-              <p className="text-sm text-gray-500">{customOptions}</p>
+  const formatOrderItems = (orderDetails: any[]) => {
+    return (
+      <div className="space-y-4">
+        {orderDetails.map((detail, index) => (
+          <div key={index} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white">
+                  {detail.quantity}x {detail.dishes.dish_name}
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Base price: A${Number(detail.dishes.base_price).toFixed(2)} each
+                </p>
+              </div>
+            </div>
+            
+            {/* Customizations */}
+            {detail.order_detail_customisation_options.length > 0 && (
+              <div className="mt-3">
+                <h5 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">Customizations:</h5>
+                <div className="space-y-1">
+                  {detail.order_detail_customisation_options.map((option: any, optionIndex: number) => (
+                    <div key={optionIndex} className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">+ {option.option_values.value_name}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">A${Number(option.option_values.extra_price).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
-            <p className="text-sm">Quantity: {detail.quantity}</p>
+            
+            {/* Item Total */}
+            <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex justify-between font-medium">
+                <span className="text-gray-700 dark:text-gray-300">Item Total:</span>
+                <span className="text-gray-900 dark:text-white">A${calculateItemTotal(detail).toFixed(2)}</span>
+              </div>
+            </div>
           </div>
-          <p className="font-medium">
-            A${(Number(detail.dish.base_price) * detail.quantity).toFixed(2)}
-          </p>
-        </div>
-      )
-    })
+        ))}
+      </div>
+    )
   }
 
   if (loading) {
@@ -162,7 +191,6 @@ export default function OrderStatusPage() {
             </CardHeader>
             <CardContent>
               <div className="text-center py-6">
-                <div className="text-4xl mb-4">{statusInfo.icon}</div>
                 <p className="text-lg font-medium mb-2">{statusInfo.message}</p>
                 <p className="text-sm text-muted-foreground">
                   We'll update this page automatically when your order status changes.
@@ -183,10 +211,8 @@ export default function OrderStatusPage() {
               <div className="space-y-4">
                 {/* Order Items */}
                 <div>
-                  <h3 className="font-medium mb-3">Items Ordered</h3>
-                  <div className="space-y-3">
-                    {order.orderDetails && formatOrderItems(order.orderDetails)}
-                  </div>
+                  <h3 className="font-medium mb-3 text-gray-900 dark:text-white">Items Ordered</h3>
+                  {order.order_details && formatOrderItems(order.order_details)}
                 </div>
 
                 {/* Order Comment */}

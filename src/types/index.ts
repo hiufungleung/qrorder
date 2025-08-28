@@ -1,7 +1,7 @@
 import { OrderStatus } from '@prisma/client'
 
 export interface Restaurant {
-  restaurant_id: number
+  id: number
   name: string
   email: string
   phone: string

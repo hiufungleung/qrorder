@@ -97,7 +97,7 @@ export async function POST(
 
     // Create customisation option with values in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      const option = await tx.customisationOption.create({
+      const option = await tx.customisation_options.create({
         data: {
           option_name: optionName,
           restaurant_id: restaurantId,
@@ -105,7 +105,7 @@ export async function POST(
       })
 
       const optionValues = await Promise.all(
-        values.map((value: { value_name: string; extra_price: number }) =>
+        values.map((value: { valueName: string; extraPrice: number }) =>
           tx.option_values.create({
             data: {
               option_id: option.id,
@@ -194,7 +194,7 @@ export async function PUT(
     // Update option with values in a transaction
     const result = await prisma.$transaction(async (tx) => {
       // Update option name
-      const option = await tx.customisationOption.update({
+      const option = await tx.customisation_options.update({
         where: { id: parseInt(optionId) },
         data: { option_name: optionName },
       })
@@ -206,7 +206,7 @@ export async function PUT(
 
       // Create new option values
       const optionValues = await Promise.all(
-        values.map((value: { value_name: string; extra_price: number }) =>
+        values.map((value: { valueName: string; extraPrice: number }) =>
           tx.option_values.create({
             data: {
               option_id: option.id,
@@ -309,7 +309,7 @@ export async function DELETE(
       await tx.option_values.deleteMany({
         where: { option_id: parseInt(optionId) }
       })
-      await tx.customisationOption.delete({
+      await tx.customisation_options.delete({
         where: { id: parseInt(optionId) }
       })
     })

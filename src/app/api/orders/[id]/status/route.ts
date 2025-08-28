@@ -37,7 +37,7 @@ export async function PUT(
 
     // Get order to check restaurant ownership
     const order = await prisma.orders.findUnique({
-      where: { order_id: orderId },
+      where: { id: orderId },
       select: { restaurant_id: true }
     })
 
@@ -57,10 +57,10 @@ export async function PUT(
     }
 
     const updatedOrder = await prisma.orders.update({
-      where: { order_id: orderId },
+      where: { id: orderId },
       data: { status },
       select: {
-        order_id: true,
+        id: true,
         order_number: true,
         status: true,
         restaurant_id: true

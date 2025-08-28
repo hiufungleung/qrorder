@@ -1,7 +1,7 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { Navbar } from './navbar'
 
@@ -12,6 +12,8 @@ interface SessionRestaurantLayoutProps {
 export function SessionRestaurantLayout({ children }: SessionRestaurantLayoutProps) {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const adminRestaurantId = searchParams.get('restaurantId')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -21,16 +23,20 @@ export function SessionRestaurantLayout({ children }: SessionRestaurantLayoutPro
       return
     }
 
-    // Both admins and non-admins need a restaurant ID to access restaurant pages
-    if (!session.user.restaurantId) {
-      if (session.user.isAdmin) {
-        router.push('/admin')
-      } else {
-        router.push('/auth/login?error=no-restaurant')
-      }
+    // Non-admin users need their own restaurant ID
+    if (!session.user.isAdmin && !session.user.restaurantId) {
+      router.push('/auth/login?error=no-restaurant')
       return
     }
-  }, [session, status, router])
+
+    // Admin users can access via URL parameter or their own restaurant ID
+    if (session.user.isAdmin) {
+      if (!session.user.restaurantId && !adminRestaurantId) {
+        router.push('/admin')
+        return
+      }
+    }
+  }, [session, status, router, adminRestaurantId])
 
   if (status === 'loading') {
     return (
@@ -40,7 +46,10 @@ export function SessionRestaurantLayout({ children }: SessionRestaurantLayoutPro
     )
   }
 
-  if (!session || !session.user.restaurantId) {
+  // Allow access if user has restaurant ID OR is admin with URL parameter
+  const hasAccess = session?.user?.restaurantId || (session?.user?.isAdmin && adminRestaurantId)
+  
+  if (!session || !hasAccess) {
     return null
   }
 

@@ -49,11 +49,17 @@ function RestaurantEditModal({ isOpen, onClose, onSubmit, restaurant = null }: {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-6 border-b dark:border-gray-700">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold dark:text-white">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               {restaurant ? 'Edit Restaurant' : 'Add Restaurant'}
             </h2>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
@@ -128,6 +134,7 @@ export default function AdminPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null)
   const [showSuccessMessage, setShowSuccessMessage] = useState<{show: boolean, message: string}>({show: false, message: ''})
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<{show: boolean, restaurant: Restaurant | null}>({show: false, restaurant: null})
 
   useEffect(() => {
     fetchRestaurants()
@@ -161,10 +168,15 @@ export default function AdminPage() {
     fetchRestaurants(searchTerm)
   }
 
-  const handleDelete = async (id: number, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) {
-      return
-    }
+  const handleDeleteClick = (restaurant: Restaurant) => {
+    setShowDeleteConfirm({show: true, restaurant})
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!showDeleteConfirm.restaurant) return
+    
+    const {id, name} = showDeleteConfirm.restaurant
+    setShowDeleteConfirm({show: false, restaurant: null})
 
     try {
       const response = await fetch(`/api/restaurants/${id}`, {
@@ -310,7 +322,7 @@ export default function AdminPage() {
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button variant="outline" size="sm" asChild>
-                            <Link href={`/restaurant/${restaurant.id}`}>View</Link>
+                            <Link href={`/restaurant?restaurantId=${restaurant.id}`}>Manage</Link>
                           </Button>
                           <Button 
                             variant="outline" 
@@ -322,7 +334,7 @@ export default function AdminPage() {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => handleDelete(restaurant.id, restaurant.name)}
+                            onClick={() => handleDeleteClick(restaurant)}
                           >
                             Delete
                           </Button>
@@ -347,6 +359,45 @@ export default function AdminPage() {
         onSubmit={handleUpdateRestaurant}
         restaurant={editingRestaurant}
       />
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm.show && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowDeleteConfirm({show: false, restaurant: null})
+            }
+          }}
+        >
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Delete Restaurant
+              </h3>
+            </div>
+            
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Are you sure you want to delete "<strong>{showDeleteConfirm.restaurant?.name}</strong>"? This action cannot be undone.
+            </p>
+            
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteConfirm({show: false, restaurant: null})}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteConfirm}
+              >
+                Delete Restaurant
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Success Notification */}
       {showSuccessMessage.show && (

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { SessionRestaurantLayout } from '@/components/layout/session-restaurant-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import Link from 'next/link'
 import { Restaurant, DishCategory, CustomisationOption, Dish, Table as RestaurantTable } from '@/types'
-import { X, Plus, Trash2 } from 'lucide-react'
+import { X, Plus, Trash2, ArrowLeft } from 'lucide-react'
 
 // Modal component for adding/editing categories
 function CategoryModal({ isOpen, onClose, onSubmit, category = null }: {
@@ -36,21 +36,27 @@ function CategoryModal({ isOpen, onClose, onSubmit, category = null }: {
     e.preventDefault()
     if (category) {
       // Editing existing category
-      onSubmit({ categoryId: category.id, category_name: name })
+      onSubmit({ categoryId: category.id, categoryName: name })
     } else {
       // Adding new category
-      onSubmit({ category_name: name })
+      onSubmit({ categoryName: name })
     }
     setName('')
     onClose()
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full">
+    <div 
+      className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg max-w-md w-full"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-6 border-b dark:border-gray-700">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold dark:text-white">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               {category ? 'Edit Category' : 'Add New Category'}
             </h2>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
@@ -88,22 +94,22 @@ function OptionModal({ isOpen, onClose, onSubmit, option = null }: {
   option?: CustomisationOption | null
 }) {
   const [optionName, setOptionName] = useState('')
-  const [values, setValues] = useState([{ value_name: '', extra_price: 0 }])
+  const [values, setValues] = useState([{ valueName: '', extraPrice: 0 }])
 
   useEffect(() => {
     if (option) {
       setOptionName(option.option_name || '')
-      setValues(option.optionValues?.length ? option.optionValues.map(v => ({ value_name: v.value_name, extra_price: v.extra_price })) : [{ value_name: '', extra_price: 0 }])
+      setValues(option.optionValues?.length ? option.optionValues.map(v => ({ valueName: v.value_name, extraPrice: v.extra_price })) : [{ valueName: '', extraPrice: 0 }])
     } else {
       setOptionName('')
-      setValues([{ value_name: '', extra_price: 0 }])
+      setValues([{ valueName: '', extraPrice: 0 }])
     }
   }, [option, isOpen])
 
   if (!isOpen) return null
 
   const addValue = () => {
-    setValues([...values, { value_name: '', extra_price: 0 }])
+    setValues([...values, { valueName: '', extraPrice: 0 }])
   }
 
   const removeValue = (index: number) => {
@@ -119,24 +125,30 @@ function OptionModal({ isOpen, onClose, onSubmit, option = null }: {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const data = { 
-      option_name: optionName, 
-      values: values.filter(v => v.value_name) 
+      optionName: optionName, 
+      values: values.filter(v => v.valueName) 
     }
     if (option) {
       data.optionId = option.id
     }
     onSubmit(data)
     setOptionName('')
-    setValues([{ value_name: '', extra_price: 0 }])
+    setValues([{ valueName: '', extraPrice: 0 }])
     onClose()
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-6 border-b dark:border-gray-700">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold dark:text-white">{option ? 'Edit Customization Option' : 'Add Customization Option'}</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{option ? 'Edit Customization Option' : 'Add Customization Option'}</h2>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
               <X className="h-5 w-5" />
             </button>
@@ -166,16 +178,16 @@ function OptionModal({ isOpen, onClose, onSubmit, option = null }: {
                   <div key={index} className="flex gap-2">
                     <Input
                       placeholder="Value name (e.g., Small, Large)"
-                      value={value.value_name}
-                      onChange={(e) => updateValue(index, 'value_name', e.target.value)}
+                      value={value.valueName}
+                      onChange={(e) => updateValue(index, 'valueName', e.target.value)}
                       required
                     />
                     <Input
                       type="number"
                       step="0.01"
                       placeholder="Extra price"
-                      value={value.extra_price}
-                      onChange={(e) => updateValue(index, 'extra_price', parseFloat(e.target.value) || 0)}
+                      value={value.extraPrice}
+                      onChange={(e) => updateValue(index, 'extraPrice', parseFloat(e.target.value) || 0)}
                       className="w-32"
                     />
                     {values.length > 1 && (
@@ -269,11 +281,17 @@ function DishModal({ isOpen, onClose, onSubmit, categories, options, dish = null
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-6 border-b dark:border-gray-700">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold dark:text-white">{dish ? 'Edit Dish' : 'Add New Dish'}</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{dish ? 'Edit Dish' : 'Add New Dish'}</h2>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
               <X className="h-5 w-5" />
             </button>
@@ -341,7 +359,7 @@ function DishModal({ isOpen, onClose, onSubmit, categories, options, dish = null
                         type="checkbox"
                         checked={dishData.selectedOptions.includes(option.id)}
                         onChange={() => toggleOption(option.id)}
-                        className="rounded"
+                        className="rounded dark:bg-gray-700 dark:border-gray-600"
                       />
                       <span className="dark:text-gray-300">{option.option_name}</span>
                     </label>
@@ -361,11 +379,12 @@ function DishModal({ isOpen, onClose, onSubmit, categories, options, dish = null
 }
 
 // Modal for restaurant profile editing
-function RestaurantProfileModal({ isOpen, onClose, onSubmit, restaurant = null }: {
+function RestaurantProfileModal({ isOpen, onClose, onSubmit, restaurant = null, setError }: {
   isOpen: boolean
   onClose: () => void
   onSubmit: (data: any) => void
   restaurant?: Restaurant | null
+  setError: (error: string) => void
 }) {
   const [formData, setFormData] = useState({
     name: '',
@@ -399,7 +418,7 @@ function RestaurantProfileModal({ isOpen, onClose, onSubmit, restaurant = null }
     e.preventDefault()
     
     if (formData.password && formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match')
+      setError('Passwords do not match')
       return
     }
 
@@ -421,11 +440,17 @@ function RestaurantProfileModal({ isOpen, onClose, onSubmit, restaurant = null }
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-6 border-b dark:border-gray-700">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold dark:text-white">Edit Restaurant Profile</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Edit Restaurant Profile</h2>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
               <X className="h-5 w-5" />
             </button>
@@ -557,11 +582,17 @@ function TableModal({ isOpen, onClose, onSubmit, table = null }: {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full">
+    <div 
+      className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg max-w-md w-full"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-6 border-b dark:border-gray-700">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold dark:text-white">{table ? 'Edit Table' : 'Add New Table'}</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{table ? 'Edit Table' : 'Add New Table'}</h2>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
               <X className="h-5 w-5" />
             </button>
@@ -603,6 +634,16 @@ function TableModal({ isOpen, onClose, onSubmit, table = null }: {
 export default function RestaurantDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const adminRestaurantId = searchParams.get('restaurantId')
+  
+  // For admin users, use the URL parameter. For regular users, use session restaurantId
+  const restaurantId = session?.user?.isAdmin && adminRestaurantId 
+    ? parseInt(adminRestaurantId) 
+    : session?.user?.restaurantId
+  
+  // Check if this is an admin viewing another restaurant
+  const isAdminView = session?.user?.isAdmin && adminRestaurantId && parseInt(adminRestaurantId) !== session?.user?.restaurantId
   
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
   const [dishCategories, setDishCategories] = useState<DishCategory[]>([])
@@ -618,19 +659,20 @@ export default function RestaurantDashboard() {
   const [showDishModal, setShowDishModal] = useState(false)
   const [showTableModal, setShowTableModal] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
+  const [showQRModal, setShowQRModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState<DishCategory | null>(null)
   const [editingOption, setEditingOption] = useState<CustomisationOption | null>(null)
   const [editingDish, setEditingDish] = useState<Dish | null>(null)
   const [editingTable, setEditingTable] = useState<RestaurantTable | null>(null)
+  const [qrData, setQRData] = useState<{tableId: number, tableNumber: string, url: string, qrUrl: string} | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{show: boolean, type: string, id: number, name: string}>({show: false, type: '', id: 0, name: ''})
   const [showSuccessMessage, setShowSuccessMessage] = useState<{show: boolean, message: string}>({show: false, message: ''})
 
   const fetchRestaurantData = useCallback(async () => {
-    if (!session?.user?.restaurantId) return
+    if (!restaurantId) return
 
     try {
       setLoading(true)
-      const restaurantId = session.user.restaurantId
       
       // Fetch all data in a single bundled API call
       const response = await fetch(`/api/restaurants/${restaurantId}/dashboard`)
@@ -651,7 +693,7 @@ export default function RestaurantDashboard() {
     } finally {
       setLoading(false)
     }
-  }, [session?.user?.restaurantId])
+  }, [restaurantId])
 
   useEffect(() => {
     if (status === 'loading') return
@@ -662,22 +704,22 @@ export default function RestaurantDashboard() {
     }
 
     // Allow admins to view restaurants but redirect if no restaurant ID is provided
-    if (session.user.isAdmin && !session.user.restaurantId) {
+    if (session.user.isAdmin && !restaurantId) {
       router.push('/admin')
       return
     }
 
-    if (!session.user.restaurantId) {
+    if (!restaurantId) {
       setError('No restaurant associated with your account')
       return
     }
 
     fetchRestaurantData()
-  }, [session?.user?.restaurantId, status, fetchRestaurantData])
+  }, [restaurantId, status, fetchRestaurantData])
 
   const handleAddCategory = async (data: any) => {
     try {
-      const url = `/api/restaurants/${session?.user?.restaurantId}/categories`
+      const url = `/api/restaurants/${restaurantId}/categories`
       const method = data.categoryId ? 'PUT' : 'POST'
       
       const response = await fetch(url, {
@@ -694,7 +736,7 @@ export default function RestaurantDashboard() {
           setDishCategories(categories => 
             categories.map(cat => 
               cat.id === data.categoryId 
-                ? { ...cat, category_name: data.category_name }
+                ? { ...cat, category_name: data.categoryName }
                 : cat
             )
           )
@@ -720,7 +762,7 @@ export default function RestaurantDashboard() {
 
   const handleAddOption = async (data: any) => {
     try {
-      const url = `/api/restaurants/${session?.user?.restaurantId}/customisation-options`
+      const url = `/api/restaurants/${restaurantId}/customisation-options`
       const method = data.optionId ? 'PUT' : 'POST'
       
       const response = await fetch(url, {
@@ -763,7 +805,7 @@ export default function RestaurantDashboard() {
 
   const handleAddDish = async (data: any) => {
     try {
-      const url = `/api/restaurants/${session?.user?.restaurantId}/dishes`
+      const url = `/api/restaurants/${restaurantId}/dishes`
       const method = data.dishId ? 'PUT' : 'POST'
       
       const response = await fetch(url, {
@@ -780,7 +822,15 @@ export default function RestaurantDashboard() {
           // Update existing dish
           const dishWithCategory = {
             ...result.data,
-            category: { id: category?.id, category_name: category?.category_name }
+            category: { id: category?.id, category_name: category?.category_name },
+            availableOptions: result.data.dish_available_options?.map(dao => ({
+              dish_id: result.data.id,
+              option_id: dao.customisation_options?.id,
+              option: {
+                id: dao.customisation_options?.id,
+                option_name: dao.customisation_options?.option_name
+              }
+            })) || []
           }
           setDishes(dishes => 
             dishes.map(dish => 
@@ -792,7 +842,15 @@ export default function RestaurantDashboard() {
           // Add new dish
           const dishWithCategory = {
             ...result.data,
-            category: { id: category?.id, category_name: category?.category_name }
+            category: { id: category?.id, category_name: category?.category_name },
+            availableOptions: result.data.dish_available_options?.map(dao => ({
+              dish_id: result.data.id,
+              option_id: dao.customisation_options?.id,
+              option: {
+                id: dao.customisation_options?.id,
+                option_name: dao.customisation_options?.option_name
+              }
+            })) || []
           }
           setDishes(dishes => [...dishes, dishWithCategory])
           showSuccess('Dish added successfully!')
@@ -808,7 +866,7 @@ export default function RestaurantDashboard() {
 
   const handleAddTable = async (data: any) => {
     try {
-      const url = `/api/restaurants/${session?.user?.restaurantId}/tables`
+      const url = `/api/restaurants/${restaurantId}/tables`
       const method = data.tableId ? 'PUT' : 'POST'
       
       const response = await fetch(url, {
@@ -850,7 +908,7 @@ export default function RestaurantDashboard() {
 
   const handleUpdateProfile = async (data: any) => {
     try {
-      const response = await fetch(`/api/restaurants/${session?.user?.restaurantId}`, {
+      const response = await fetch(`/api/restaurants/${restaurantId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -863,11 +921,11 @@ export default function RestaurantDashboard() {
       } else {
         const errorData = await response.json()
         console.error('Failed to update profile:', errorData.message)
-        alert('Failed to update profile: ' + errorData.message)
+        setError('Failed to update profile: ' + errorData.message)
       }
     } catch (error) {
       console.error('Failed to update profile:', error)
-      alert('Failed to update profile')
+      setError('Failed to update profile')
     }
   }
 
@@ -907,7 +965,7 @@ export default function RestaurantDashboard() {
         table: `tableId=${id}`
       }
       
-      const response = await fetch(`/api/restaurants/${session?.user?.restaurantId}/${endpoints[type as keyof typeof endpoints]}?${params[type as keyof typeof params]}`, {
+      const response = await fetch(`/api/restaurants/${restaurantId}/${endpoints[type as keyof typeof endpoints]}?${params[type as keyof typeof params]}`, {
         method: 'DELETE'
       })
       
@@ -934,36 +992,28 @@ export default function RestaurantDashboard() {
       } else {
         const errorData = await response.json()
         console.error(`Failed to delete ${type}:`, errorData.message)
-        alert(`Failed to delete ${type}: ${errorData.message}`)
+        setError(`Failed to delete ${type}: ${errorData.message}`)
       }
     } catch (error) {
       console.error(`Failed to delete ${type}:`, error)
-      alert(`Failed to delete ${type}`)
+      setError(`Failed to delete ${type}`)
     } finally {
       setShowDeleteConfirm({show: false, type: '', id: 0, name: ''})
     }
   }
 
   const handleGenerateQR = (tableId: number) => {
-    const url = `${window.location.origin}/ordering?restaurantId=${session?.user?.restaurantId}&tableId=${tableId}`
-    // Create QR code URL using a QR code service
+    const table = tables.find(t => t.id === tableId)
+    const url = `${window.location.origin}/ordering?restaurantId=${restaurantId}&tableId=${tableId}`
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`
     
-    // Open QR code in new window
-    const newWindow = window.open('', '_blank', 'width=400,height=400')
-    if (newWindow) {
-      newWindow.document.write(`
-        <html>
-          <head><title>QR Code for Table</title></head>
-          <body style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;">
-            <h2>QR Code for Table</h2>
-            <img src="${qrUrl}" alt="QR Code" style="border: 1px solid #ccc; padding: 10px;">
-            <p style="text-align: center; margin-top: 10px; font-size: 12px; word-break: break-all;">${url}</p>
-            <button onclick="window.print()" style="margin-top: 10px; padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer;">Print QR Code</button>
-          </body>
-        </html>
-      `)
-    }
+    setQRData({
+      tableId,
+      tableNumber: table?.table_number || 'Unknown',
+      url,
+      qrUrl
+    })
+    setShowQRModal(true)
   }
 
   const truncateText = (text: string, maxLength: number = 30): string => {
@@ -985,23 +1035,35 @@ export default function RestaurantDashboard() {
     return (
       <SessionRestaurantLayout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-red-600">Error</h2>
+          <h2 className="text-2xl font-bold text-red-600 dark:text-red-400">Error</h2>
           <p className="text-gray-600 dark:text-gray-400 mt-2">{error || 'Restaurant not found'}</p>
         </div>
       </SessionRestaurantLayout>
     )
   }
 
-  const restaurantId = session?.user?.restaurantId
 
   return (
     <SessionRestaurantLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">{restaurant.name} Dashboard</h1>
-            <p className="text-gray-600 dark:text-gray-400">Manage your restaurant</p>
+          <div className="flex items-center gap-3">
+            {isAdminView && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/admin">
+                  <ArrowLeft className="h-4 w-4 mr-1" /> Back to Admin
+                </Link>
+              </Button>
+            )}
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                {isAdminView ? `Managing: ${restaurant.name}` : `${restaurant.name} Dashboard`}
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                {isAdminView ? 'Admin view - Managing restaurant settings, menu, and tables' : 'Manage your restaurant'}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -1029,7 +1091,7 @@ export default function RestaurantDashboard() {
             </CardHeader>
             <CardContent className="space-y-3">
               <Button asChild className="w-full">
-                <Link href={`/manage/orders`}>
+                <Link href={`/manage/orders?restaurantId=${restaurantId}`}>
                   Manage Orders
                 </Link>
               </Button>
@@ -1280,15 +1342,87 @@ export default function RestaurantDashboard() {
         isOpen={showProfileModal} 
         onClose={() => setShowProfileModal(false)}
         onSubmit={handleUpdateProfile}
+        setError={setError}
         restaurant={restaurant}
       />
 
+      {/* QR Code Modal */}
+      {showQRModal && qrData && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          onClick={() => setShowQRModal(false)}
+        >
+          <div 
+            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                  QR Code for {qrData.tableNumber}
+                </h3>
+                <button 
+                  onClick={() => setShowQRModal(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="text-center">
+                <div className="mb-4">
+                  <img 
+                    src={qrData.qrUrl} 
+                    alt="QR Code" 
+                    className="mx-auto border border-gray-200 dark:border-gray-600 p-2 rounded"
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <a 
+                    href={qrData.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 underline text-sm break-all"
+                  >
+                    {qrData.url}
+                  </a>
+                </div>
+                
+                <div className="flex justify-center gap-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowQRModal(false)}
+                  >
+                    Close
+                  </Button>
+                  <Button 
+                    onClick={() => window.print()}
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    Print QR Code
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirmation Dialog */}
       {showDeleteConfirm.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full">
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          onClick={() => setShowDeleteConfirm({show: false, type: '', id: 0, name: ''})}
+        >
+          <div 
+            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6">
-              <h3 className="text-lg font-bold text-red-600 mb-4">Confirm Delete</h3>
+              <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-4">Confirm Delete</h3>
               <p className="text-gray-700 dark:text-gray-300 mb-6">
                 Are you sure you want to delete "{showDeleteConfirm.name}"? This action cannot be undone.
               </p>

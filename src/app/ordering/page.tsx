@@ -44,7 +44,7 @@ function OrderModal({ dish, isOpen, onClose, onAddToCart }: OrderModalProps) {
   }, [selectedValues, quantity, dish])
 
   const calculatePrice = (values: Record<number, number>, qty: number, currentDish: MenuDish) => {
-    let totalPrice = currentDish.basePrice
+    let totalPrice = currentDish.base_price
 
     // Add extra prices from selected options
     Object.values(values).forEach(valueId => {
@@ -84,11 +84,17 @@ function OrderModal({ dish, isOpen, onClose, onAddToCart }: OrderModalProps) {
   if (!isOpen || !dish) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center sm:p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-lg w-full sm:max-w-md max-h-[85vh] sm:max-h-[90vh] overflow-hidden flex flex-col animate-slide-up sm:animate-none">
+    <div 
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 z-50"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-lg w-full sm:max-w-md max-h-[85vh] sm:max-h-[90vh] overflow-hidden flex flex-col animate-slide-up sm:animate-none"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-4 sm:p-6 border-b dark:border-gray-700 flex-shrink-0">
           <div className="flex justify-between items-center">
-            <h2 className="text-lg sm:text-xl font-bold dark:text-white">{dish.dish_name}</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{dish.dish_name}</h2>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
               <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
             </button>
@@ -140,7 +146,7 @@ function OrderModal({ dish, isOpen, onClose, onAddToCart }: OrderModalProps) {
                 type="number"
                 value={quantity}
                 onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-20 text-center text-lg"
+                className="w-20 text-center text-lg text-gray-900 dark:text-white"
                 min="1"
               />
               <Button
@@ -179,11 +185,17 @@ function ShoppingCartModal({ isOpen, onClose, cart, updateQuantity, removeFromCa
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center sm:p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-lg w-full sm:max-w-md max-h-[85vh] sm:max-h-[90vh] overflow-hidden flex flex-col animate-slide-up sm:animate-none">
+    <div 
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 z-50"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-lg w-full sm:max-w-md max-h-[85vh] sm:max-h-[90vh] overflow-hidden flex flex-col animate-slide-up sm:animate-none"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-4 sm:p-6 border-b dark:border-gray-700 flex-shrink-0">
           <div className="flex justify-between items-center">
-            <h2 className="text-lg sm:text-xl font-bold dark:text-white">Shopping Cart</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Shopping Cart</h2>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
               <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
             </button>
@@ -329,11 +341,21 @@ function CheckoutModal({ isOpen, onClose, cart, restaurantId, tableId, onOrderCo
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center sm:p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-lg w-full sm:max-w-md max-h-[85vh] sm:max-h-[90vh] overflow-hidden flex flex-col animate-slide-up sm:animate-none">
+    <div 
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 z-50"
+      onClick={(e) => {
+        if (!isSubmitting) {
+          onClose()
+        }
+      }}
+    >
+      <div 
+        className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-lg w-full sm:max-w-md max-h-[85vh] sm:max-h-[90vh] overflow-hidden flex flex-col animate-slide-up sm:animate-none"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-4 sm:p-6 border-b dark:border-gray-700 flex-shrink-0">
           <div className="flex justify-between items-center">
-            <h2 className="text-lg sm:text-xl font-bold dark:text-white">Checkout</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Checkout</h2>
             <button 
               onClick={onClose} 
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
@@ -383,7 +405,7 @@ function CheckoutModal({ isOpen, onClose, cart, restaurantId, tableId, onOrderCo
                   placeholder="Enter your name"
                   required
                   disabled={isSubmitting}
-                  className="w-full"
+                  className="w-full text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -461,8 +483,14 @@ function OrderSuccessModal({ isOpen, orderData, onClose }: {
   if (!isOpen || !orderData) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full p-6 text-center animate-scale-up">
+    <div 
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full p-6 text-center animate-scale-up"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -578,6 +606,29 @@ export default function OrderingPage() {
     }
   }, [categories, activeCategory])
 
+  // Auto-scroll active category into view on mobile
+  useEffect(() => {
+    if (activeCategory) {
+      const activeButton = document.querySelector(`[data-category-id="${activeCategory}"]`)
+      const navContainer = document.querySelector('.category-nav-container')
+      
+      if (activeButton && navContainer) {
+        const containerRect = navContainer.getBoundingClientRect()
+        const buttonRect = activeButton.getBoundingClientRect()
+        
+        // Check if button is outside the visible area
+        if (buttonRect.left < containerRect.left || buttonRect.right > containerRect.right) {
+          // Scroll the button into the center of the container
+          const scrollLeft = activeButton.offsetLeft - navContainer.offsetWidth / 2 + activeButton.offsetWidth / 2
+          navContainer.scrollTo({
+            left: scrollLeft,
+            behavior: 'smooth'
+          })
+        }
+      }
+    }
+  }, [activeCategory])
+
   const fetchMenu = async () => {
     try {
       setLoading(true)
@@ -677,18 +728,36 @@ export default function OrderingPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile-optimized Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 sticky top-0 z-40">
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 sticky top-0 z-50">
         <div className="px-4 sm:container sm:mx-auto">
           <div className="flex items-center justify-between h-14 sm:h-16">
             <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden"
+              <button
+                className="lg:hidden bg-transparent border-none cursor-pointer p-2 relative z-[101] w-11 h-11 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                data-toggle={showSidebar ? "open" : "closed"}
+                aria-haspopup="true"
+                aria-expanded={showSidebar}
                 onClick={() => setShowSidebar(!showSidebar)}
               >
-                <Menu className="h-5 w-5" />
-              </Button>
+                <span className="sr-only">Toggle navigation menu</span>
+                <div className="relative w-6 h-4 flex flex-col justify-between">
+                  <span className={`block h-0.5 w-full bg-current transition-all duration-300 ease-in-out transform-gpu ${
+                    showSidebar 
+                      ? 'rotate-45 translate-y-[7px]' 
+                      : 'rotate-0 translate-y-0'
+                  }`} />
+                  <span className={`block h-0.5 w-full bg-current transition-all duration-300 ease-in-out transform-gpu ${
+                    showSidebar 
+                      ? 'opacity-0 scale-x-0' 
+                      : 'opacity-100 scale-x-100'
+                  }`} />
+                  <span className={`block h-0.5 w-full bg-current transition-all duration-300 ease-in-out transform-gpu ${
+                    showSidebar 
+                      ? '-rotate-45 -translate-y-[7px]' 
+                      : 'rotate-0 translate-y-0'
+                  }`} />
+                </div>
+              </button>
               <div>
                 <h1 className="text-lg sm:text-2xl font-bold dark:text-white line-clamp-1">{restaurant.name}</h1>
                 <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Table {tableId}</p>
@@ -714,11 +783,12 @@ export default function OrderingPage() {
 
       {/* Mobile Category Navigation */}
       <div className="lg:hidden sticky top-14 sm:top-16 z-30 bg-white dark:bg-gray-800 border-b dark:border-gray-700">
-        <div className="px-4 py-2 overflow-x-auto">
+        <div className="px-4 py-2 overflow-x-auto category-nav-container">
           <div className="flex gap-2 whitespace-nowrap">
             {categories.map(category => (
               <button
                 key={category.id}
+                data-category-id={category.id}
                 onClick={() => scrollToCategory(category.id)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeCategory === category.id 
@@ -756,15 +826,12 @@ export default function OrderingPage() {
 
         {/* Mobile Sidebar Overlay */}
         {showSidebar && (
-          <div className="lg:hidden fixed inset-0 z-50 flex">
-            <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setShowSidebar(false)} />
-            <div className="relative bg-white dark:bg-gray-800 w-64 h-full shadow-xl animate-slide-in">
+          <div className="lg:hidden fixed inset-0 z-40">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowSidebar(false)} />
+            <div className="fixed top-[calc(3.5rem-1px)] sm:top-[calc(4rem-1px)] left-0 h-[calc(100vh-3.5rem+1px)] sm:h-[calc(100vh-4rem+1px)] w-64 bg-white dark:bg-gray-800 shadow-xl animate-slide-in overflow-y-auto">
               <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-4">
                   <h3 className="font-bold text-lg dark:text-white">Categories</h3>
-                  <button onClick={() => setShowSidebar(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                    <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                  </button>
                 </div>
                 <nav className="space-y-2">
                   {categories.map(category => (

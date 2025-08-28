@@ -22,7 +22,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     }
 
     if (!session.user.isAdmin) {
-      router.push(`/restaurant/${session.user.restaurantId}`)
+      router.push('/restaurant')
       return
     }
   }, [session, status, router])

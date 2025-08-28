@@ -18,9 +18,9 @@ export async function POST(request: NextRequest) {
 
     for (const cartItem of dishes) {
       // Get dish base price
-      const dish = await prisma.dish.findUnique({
+      const dish = await prisma.dishes.findUnique({
         where: { id: cartItem.dishId || cartItem.DishID },
-        select: { basePrice: true, dishName: true }
+        select: { base_price: true, dish_name: true }
       })
 
       if (!dish) {
@@ -30,19 +30,19 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      let unitPrice = Number(dish.basePrice)
+      let unitPrice = Number(dish.base_price)
 
       // Add customization option prices
       const selectedValuesId = cartItem.selectedValuesId || cartItem.SelectedValuesID || []
       if (selectedValuesId.length > 0) {
-        const optionValues = await prisma.optionValue.findMany({
+        const optionValues = await prisma.option_values.findMany({
           where: {
             id: { in: selectedValuesId }
           },
-          select: { extraPrice: true }
+          select: { extra_price: true }
         })
 
-        const optionsPrice = optionValues.reduce((sum, value) => sum + Number(value.extraPrice), 0)
+        const optionsPrice = optionValues.reduce((sum, value) => sum + Number(value.extra_price), 0)
         unitPrice += optionsPrice
       }
 
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 
       calculatedDishes.push({
         DishID: cartItem.dishId || cartItem.DishID,
-        DishName: dish.dishName,
+        DishName: dish.dish_name,
         Quantity: quantity,
         UnitPrice: unitPrice,
         ItemTotal: itemTotal,
