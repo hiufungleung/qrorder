@@ -37,7 +37,7 @@ export const authOptions: NextAuthOptions = {
           }
 
           return {
-            id: user.restaurant_id.toString(),
+            id: user.id.toString(),
             email: user.email,
             name: user.name,
             isAdmin: user.is_admin,
