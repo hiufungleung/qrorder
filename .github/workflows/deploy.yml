@@ -1,0 +1,106 @@
+name: Build & Deploy QR Order System
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+# All environment variables are set in GitHub repository → Settings → Secrets and variables → Actions → Variables
+# Required Variables: IMAGE_NAME, IMAGE_TAG, APP_PORT, CONTAINER_NAME, DOCKER_USERNAME, EC2_HOST, EC2_USER, NEXTAUTH_URL
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      digest:     ${{ steps.build.outputs.digest }}     # image digest（單架構也會有）
+      image_ref:  ${{ steps.meta.outputs.image_ref }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Compose image ref
+        id: meta
+        run: echo "image_ref=${{ vars.IMAGE_NAME }}:${{ vars.IMAGE_TAG }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build & Push (amd64) to Docker Hub
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ vars.IMAGE_NAME }}:${{ vars.IMAGE_TAG }}
+            ${{ vars.IMAGE_NAME }}:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ vars.EC2_HOST }}
+          username: ${{ vars.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            set -euo pipefail
+
+            CONTAINER=${{ vars.CONTAINER_NAME }}
+            PORT=${{ vars.APP_PORT }}
+
+            IMAGE_NAME="${{ vars.IMAGE_NAME }}"
+            RAW_DIGEST="${{ needs.build.outputs.digest }}"
+            DIGEST="$(printf '%s' "$RAW_DIGEST" | tr -d '\r\n')"
+
+            if [ -n "$DIGEST" ]; then
+              IMAGE_REF="${IMAGE_NAME}@${DIGEST}"
+            else
+              IMAGE_REF="${IMAGE_NAME}:${{ github.sha }}"
+            fi
+            echo "Using image: $IMAGE_REF"
+
+            # Login on EC2 (needed if repo is private)
+            echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ vars.DOCKER_USERNAME }}" --password-stdin
+
+            # Ensure the app network exists (shared with Nginx)
+            docker network inspect web >/dev/null 2>&1 || docker network create web
+
+            # Replace old container
+            docker rm -f "$CONTAINER" 2>/dev/null || true
+            docker pull "$IMAGE_REF"
+
+            docker run -d --name "$CONTAINER" \
+              --network web \
+              -e HOSTNAME=0.0.0.0 \
+              -e PORT=$PORT \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              -e NEXTAUTH_SECRET="${{ secrets.NEXTAUTH_SECRET }}" \
+              -e NEXTAUTH_URL="${{ vars.NEXTAUTH_URL }}" \
+              --restart unless-stopped \
+              "$IMAGE_REF"
+
+            # Health check: wait for app to be ready
+            for i in {1..30}; do
+              if docker run --rm --network web curlimages/curl:8.8.0 \
+                   -fsS "http://$CONTAINER:$PORT/" >/dev/null; then
+                echo "UP"; break
+              fi
+              sleep 2
+            done
+
+            # Delete old images to save space
+            docker image prune -f

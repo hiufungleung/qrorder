@@ -1,0 +1,320 @@
+# Starbucks Restaurant Template
+# This template creates a complete Starbucks-style restaurant with menu, customization options, and sample orders
+
+metadata:
+  name: "Starbucks Coffee"
+  description: "Complete Starbucks restaurant template with drinks, food, and customization options"
+  version: "1.0.0"
+  created: "2025-01-28"
+  author: "QR Order System"
+  tags: ["coffee", "cafe", "drinks", "food"]
+
+restaurant:
+  name: "Starbucks Coffee"
+  email: "starbucks@demo.com"
+  password: "demo123"  # Will be hashed during import
+  address: "123 Coffee Street, Sydney NSW 2000"
+  phone: "+61-2-1234-5678"
+  isAdmin: false
+
+customisation_options:
+  - name: "Size"
+    values:
+      - name: "Tall (12oz)"
+        extra_price: 0.00
+      - name: "Grande (16oz)" 
+        extra_price: 0.70
+      - name: "Venti (20oz)"
+        extra_price: 1.20
+
+  - name: "Milk Type"
+    values:
+      - name: "Whole Milk"
+        extra_price: 0.00
+      - name: "2% Milk"
+        extra_price: 0.00
+      - name: "Skim Milk"
+        extra_price: 0.00
+      - name: "Soy Milk"
+        extra_price: 0.80
+      - name: "Almond Milk"
+        extra_price: 0.80
+      - name: "Oat Milk"
+        extra_price: 0.80
+      - name: "Coconut Milk"
+        extra_price: 0.80
+
+  - name: "Coffee Strength"
+    values:
+      - name: "Regular"
+        extra_price: 0.00
+      - name: "Decaf"
+        extra_price: 0.00
+      - name: "Half Caff"
+        extra_price: 0.00
+      - name: "Extra Shot"
+        extra_price: 0.85
+
+  - name: "Sweetener"
+    values:
+      - name: "No Sweetener"
+        extra_price: 0.00
+      - name: "Sugar"
+        extra_price: 0.00
+      - name: "Honey"
+        extra_price: 0.00
+      - name: "Stevia"
+        extra_price: 0.00
+      - name: "Vanilla Syrup"
+        extra_price: 0.65
+      - name: "Caramel Syrup"
+        extra_price: 0.65
+      - name: "Hazelnut Syrup"
+        extra_price: 0.65
+
+  - name: "Temperature"
+    values:
+      - name: "Hot"
+        extra_price: 0.00
+      - name: "Iced"
+        extra_price: 0.00
+      - name: "Extra Hot"
+        extra_price: 0.00
+
+  - name: "Bread Type"
+    values:
+      - name: "White Bread"
+        extra_price: 0.00
+      - name: "Wholemeal Bread"
+        extra_price: 0.50
+      - name: "Sourdough"
+        extra_price: 0.50
+      - name: "Bagel"
+        extra_price: 1.00
+
+categories:
+  - name: "Espresso Drinks"
+    description: "Premium espresso-based beverages"
+    
+  - name: "Frappuccinos"
+    description: "Blended ice beverages"
+    
+  - name: "Hot Coffees" 
+    description: "Classic hot coffee drinks"
+    
+  - name: "Cold Coffees"
+    description: "Refreshing cold coffee beverages"
+    
+  - name: "Teas & More"
+    description: "Tea, hot chocolate, and other beverages"
+    
+  - name: "Food & Snacks"
+    description: "Pastries, sandwiches, and snacks"
+
+dishes:
+  # Espresso Drinks
+  - name: "Caffè Americano"
+    description: "Espresso shots topped with hot water to produce a light layer of crema"
+    base_price: 4.45
+    category: "Espresso Drinks"
+    available_options: ["Size", "Coffee Strength", "Temperature"]
+    
+  - name: "Cappuccino"
+    description: "Dark, rich espresso lies in wait under a smoothed and stretched layer of thick milk foam"
+    base_price: 4.95
+    category: "Espresso Drinks"
+    available_options: ["Size", "Milk Type", "Coffee Strength", "Sweetener", "Temperature"]
+    
+  - name: "Caffe Latte"
+    description: "Rich, full-bodied espresso with steamed milk and a light layer of foam"
+    base_price: 5.45
+    category: "Espresso Drinks"
+    available_options: ["Size", "Milk Type", "Coffee Strength", "Sweetener", "Temperature"]
+    
+  - name: "Caramel Macchiato"
+    description: "Steamed milk with vanilla-flavoured syrup, marked with espresso and caramel drizzle"
+    base_price: 6.25
+    category: "Espresso Drinks"
+    available_options: ["Size", "Milk Type", "Coffee Strength", "Temperature"]
+
+  # Frappuccinos
+  - name: "Caramel Frappuccino"
+    description: "Coffee, milk and ice blended with caramel syrup and topped with whipped cream"
+    base_price: 6.95
+    category: "Frappuccinos"
+    available_options: ["Size", "Milk Type"]
+    
+  - name: "Mocha Frappuccino"
+    description: "Coffee, milk, ice and chocolate syrup blended together and topped with whipped cream"
+    base_price: 6.95
+    category: "Frappuccinos" 
+    available_options: ["Size", "Milk Type"]
+    
+  - name: "Vanilla Frappuccino"
+    description: "Coffee, milk, ice and vanilla syrup blended together and topped with whipped cream"
+    base_price: 6.75
+    category: "Frappuccinos"
+    available_options: ["Size", "Milk Type"]
+
+  # Hot Coffees
+  - name: "Pike Place Roast"
+    description: "Our signature medium roast coffee with smooth body and subtle flavours"
+    base_price: 3.85
+    category: "Hot Coffees"
+    available_options: ["Size", "Coffee Strength", "Sweetener"]
+    
+  - name: "French Roast"
+    description: "Dark roast coffee with intense smoky flavour"
+    base_price: 3.85
+    category: "Hot Coffees"
+    available_options: ["Size", "Coffee Strength", "Sweetener"]
+
+  # Cold Coffees  
+  - name: "Iced Coffee"
+    description: "Freshly brewed coffee served chilled over ice"
+    base_price: 4.25
+    category: "Cold Coffees"
+    available_options: ["Size", "Milk Type", "Sweetener"]
+    
+  - name: "Cold Brew"
+    description: "Smooth, refreshing coffee steeped slowly in cool water for 20 hours"
+    base_price: 4.75
+    category: "Cold Coffees"
+    available_options: ["Size", "Milk Type", "Sweetener"]
+
+  # Teas & More
+  - name: "Earl Grey Tea"
+    description: "Bold black tea with bergamot and lavender flavours"
+    base_price: 3.45
+    category: "Teas & More"
+    available_options: ["Size", "Sweetener", "Temperature"]
+    
+  - name: "Green Tea"
+    description: "Smooth and fresh green tea"
+    base_price: 3.45
+    category: "Teas & More" 
+    available_options: ["Size", "Sweetener", "Temperature"]
+    
+  - name: "Hot Chocolate"
+    description: "Rich chocolate flavour with steamed milk and topped with whipped cream"
+    base_price: 4.95
+    category: "Teas & More"
+    available_options: ["Size", "Milk Type", "Temperature"]
+
+  # Food & Snacks
+  - name: "Butter Croissant"
+    description: "Flaky, buttery pastry that's perfect with coffee"
+    base_price: 4.25
+    category: "Food & Snacks"
+    available_options: []
+    
+  - name: "Blueberry Muffin" 
+    description: "Moist muffin bursting with blueberries"
+    base_price: 4.75
+    category: "Food & Snacks"
+    available_options: []
+    
+  - name: "Ham & Swiss Sandwich"
+    description: "Sliced ham and Swiss cheese on your choice of bread"
+    base_price: 8.95
+    category: "Food & Snacks"
+    available_options: ["Bread Type"]
+    
+  - name: "Chicken & Avocado Sandwich"
+    description: "Grilled chicken breast with avocado, tomato and lettuce"
+    base_price: 9.95
+    category: "Food & Snacks"
+    available_options: ["Bread Type"]
+
+tables:
+  - table_number: "Table 1"
+    capacity: 2
+  - table_number: "Table 2" 
+    capacity: 4
+  - table_number: "Table 3"
+    capacity: 4
+  - table_number: "Table 4"
+    capacity: 6
+  - table_number: "Counter 1"
+    capacity: 1
+  - table_number: "Counter 2"
+    capacity: 1
+
+sample_orders:
+  - customer_name: "Sarah Johnson"
+    table_number: "Table 1"
+    status: "Completed"
+    comment: "Extra hot please!"
+    order_time: "2025-01-28T08:30:00Z"
+    items:
+      - dish_name: "Caffe Latte"
+        quantity: 1
+        customizations:
+          - option: "Size"
+            value: "Grande (16oz)"
+          - option: "Milk Type" 
+            value: "Oat Milk"
+          - option: "Temperature"
+            value: "Extra Hot"
+      - dish_name: "Butter Croissant"
+        quantity: 1
+        customizations: []
+
+  - customer_name: "Mike Chen"
+    table_number: "Table 2"
+    status: "Making"
+    comment: null
+    order_time: "2025-01-28T09:15:00Z" 
+    items:
+      - dish_name: "Caramel Frappuccino"
+        quantity: 2
+        customizations:
+          - option: "Size"
+            value: "Venti (20oz)"
+          - option: "Milk Type"
+            value: "Almond Milk"
+      - dish_name: "Ham & Swiss Sandwich"
+        quantity: 1
+        customizations:
+          - option: "Bread Type"
+            value: "Sourdough"
+
+  - customer_name: "Emma Wilson"
+    table_number: "Counter 1"
+    status: "Pending"
+    comment: "Make it strong!"
+    order_time: "2025-01-28T09:45:00Z"
+    items:
+      - dish_name: "Pike Place Roast"
+        quantity: 1
+        customizations:
+          - option: "Size"
+            value: "Grande (16oz)"
+          - option: "Coffee Strength"
+            value: "Extra Shot"
+          - option: "Sweetener"
+            value: "Vanilla Syrup"
+
+  - customer_name: "David Brown"
+    table_number: "Table 4"
+    status: "Completed"
+    comment: null
+    order_time: "2025-01-28T10:20:00Z"
+    items:
+      - dish_name: "Cappuccino"
+        quantity: 1
+        customizations:
+          - option: "Size"
+            value: "Tall (12oz)"
+          - option: "Milk Type"
+            value: "Soy Milk"
+      - dish_name: "Blueberry Muffin"
+        quantity: 1
+        customizations: []
+      - dish_name: "Green Tea"
+        quantity: 1
+        customizations:
+          - option: "Size"
+            value: "Grande (16oz)"
+          - option: "Sweetener"
+            value: "Honey"
