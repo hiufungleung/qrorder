@@ -200,10 +200,10 @@ export async function POST(request: NextRequest) {
         const createdOption = await tx.customisation_options.create({
           data: {
             option_name: option.name,
-            restaurant_id: newRestaurant.restaurant_id
+            restaurant_id: newRestaurant.id
           }
         })
-        optionMap.set(option.name, createdOption.option_id)
+        optionMap.set(option.name, createdOption.id)
 
         // Create option values
         for (const value of option.values) {
@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
             data: {
               value_name: value.name,
               extra_price: value.extra_price,
-              option_id: createdOption.option_id
+              option_id: createdOption.id
             }
           })
         }
@@ -223,10 +223,10 @@ export async function POST(request: NextRequest) {
         const createdCategory = await tx.dish_categories.create({
           data: {
             category_name: category.name,
-            restaurant_id: newRestaurant.restaurant_id
+            restaurant_id: newRestaurant.id
           }
         })
-        categoryMap.set(category.name, createdCategory.category_id)
+        categoryMap.set(category.name, createdCategory.id)
       }
 
       // Create dishes
@@ -250,7 +250,7 @@ export async function POST(request: NextRequest) {
             category_id: categoryId
           }
         })
-        dishMap.set(dish.name, createdDish.dish_id)
+        dishMap.set(dish.name, createdDish.id)
 
         // Link available options to dish
         for (const optionName of dish.available_options) {
@@ -258,7 +258,7 @@ export async function POST(request: NextRequest) {
           if (optionId) {
             await tx.dish_available_options.create({
               data: {
-                dish_id: createdDish.dish_id,
+                dish_id: createdDish.id,
                 option_id: optionId
               }
             })
@@ -273,10 +273,10 @@ export async function POST(request: NextRequest) {
           data: {
             table_number: table.table_number,
             capacity: table.capacity,
-            restaurant_id: newRestaurant.restaurant_id
+            restaurant_id: newRestaurant.id
           }
         })
-        tableMap.set(table.table_number, createdTable.table_id)
+        tableMap.set(table.table_number, createdTable.id)
       }
 
       // Create sample orders if provided
@@ -295,7 +295,7 @@ export async function POST(request: NextRequest) {
               order_time: new Date(order.order_time),
               status: order.status,
               comment: order.comment || null,
-              restaurant_id: newRestaurant.restaurant_id,
+              restaurant_id: newRestaurant.id,
               table_id: tableId
             }
           })
@@ -316,7 +316,7 @@ export async function POST(request: NextRequest) {
             const createdOrderDetail = await tx.order_details.create({
               data: {
                 quantity: item.quantity,
-                order_id: createdOrder.order_id,
+                order_id: createdOrder.id,
                 dish_id: dishId
               }
             })
@@ -337,8 +337,8 @@ export async function POST(request: NextRequest) {
               if (optionValue) {
                 await tx.order_detail_customisation_options.create({
                   data: {
-                    order_detail_id: createdOrderDetail.order_detail_id,
-                    value_id: optionValue.value_id
+                    order_detail_id: createdOrderDetail.id,
+                    value_id: optionValue.id
                   }
                 })
 
@@ -351,7 +351,7 @@ export async function POST(request: NextRequest) {
 
           // Update order total price
           await tx.orders.update({
-            where: { order_id: createdOrder.order_id },
+            where: { id: createdOrder.id },
             data: { total_price: totalPrice }
           })
         }
@@ -364,7 +364,7 @@ export async function POST(request: NextRequest) {
       status: 201,
       message: 'Account created successfully with template',
       restaurant: {
-        restaurant_id: result.restaurant_id,
+        id: result.id,
         name: result.name,
         email: result.email,
         phone: result.phone,
