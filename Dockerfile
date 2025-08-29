@@ -34,7 +34,7 @@ ENV NODE_ENV=production \
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y curl && \
     rm -rf /var/lib/apt/lists/* && \
-    useradd -m -u 10001 appuser
+    useradd -m -u 10001 nextjs-user
 
 # Enable corepack for pnpm
 RUN corepack enable
@@ -48,7 +48,7 @@ COPY --from=builder --chown=appuser:appuser /app/public ./public
 COPY --from=builder --chown=appuser:appuser /app/prisma ./prisma
 COPY --from=builder --chown=appuser:appuser /app/package.json ./package.json
 
-USER appuser
+USER nextjs-user
 
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD ["sh", "-c", "curl -f http://localhost:3000/api/health || curl -f http://localhost:3000/ || exit 1"]
 CMD ["node", "server.js"]
