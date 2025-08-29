@@ -237,7 +237,7 @@ export default function AdminPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Restaurant Management</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Restaurant Management</h1>
             <p className="text-muted-foreground">Admin Panel - Manage all restaurants</p>
           </div>
           <Button asChild>

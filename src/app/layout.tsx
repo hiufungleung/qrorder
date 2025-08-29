@@ -24,8 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.png" media="(prefers-color-scheme: light)" />
-        <link rel="icon" href="/favicon-dark.png" media="(prefers-color-scheme: dark)" />
+        <link rel="icon" href="/favicon-light.svg" media="(prefers-color-scheme: light)" />
+        <link rel="icon" href="/favicon-dark.svg" media="(prefers-color-scheme: dark)" />
+        <link rel="icon" href="/favicon.svg" />
         <script dangerouslySetInnerHTML={{
           __html: `
             function updateFavicon() {
@@ -33,11 +34,12 @@ export default function RootLayout({
                            (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
               const favicon = document.querySelector('link[rel="icon"]:not([media])');
               if (favicon) {
-                favicon.href = isDark ? '/favicon-dark.png' : '/favicon.png';
+                favicon.href = isDark ? '/favicon-dark.svg' : '/favicon-light.svg';
               } else {
                 const newFavicon = document.createElement('link');
                 newFavicon.rel = 'icon';
-                newFavicon.href = isDark ? '/favicon-dark.png' : '/favicon.png';
+                newFavicon.type = 'image/svg+xml';
+                newFavicon.href = isDark ? '/favicon-dark.svg' : '/favicon-light.svg';
                 document.head.appendChild(newFavicon);
               }
             }

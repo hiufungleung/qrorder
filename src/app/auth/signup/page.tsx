@@ -167,28 +167,28 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-lg w-full">
-        <div className="text-center mb-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-4 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-lg w-full max-h-screen overflow-y-auto">
+        <div className="text-center mb-4 sm:mb-8">
           <Link href="/" className="inline-block">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               QR Order
             </h1>
           </Link>
-          <p className="mt-2 text-gray-600 dark:text-gray-300">
+          <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-300">
             Create your restaurant account
           </p>
         </div>
 
         <Card className="shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center text-gray-900 dark:text-white">Restaurant Sign Up</CardTitle>
-            <CardDescription className="text-center text-gray-600 dark:text-gray-300">
+          <CardHeader className="pb-4 sm:pb-6">
+            <CardTitle className="text-xl sm:text-2xl text-center text-gray-900 dark:text-white">Restaurant Sign Up</CardTitle>
+            <CardDescription className="text-center text-sm sm:text-base text-gray-600 dark:text-gray-300">
               Start managing your restaurant with QR Order
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 sm:space-y-6">
               {error && (
                 <div className="p-4 text-sm text-red-700 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl">
                   {error}
@@ -284,45 +284,45 @@ export default function SignUpPage() {
               </div>
 
               {/* Template Selection */}
-              <div className="space-y-4">
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-2">
                     Quick Start Options
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
                     Choose a template to start with pre-built menu and data, or start from scratch.
                     {selectedTemplate && (
-                      <span className="block mt-2 text-blue-600 dark:text-blue-400 font-medium">
+                      <span className="block mt-2 text-blue-600 dark:text-blue-400 font-medium text-xs sm:text-sm">
                         Template selected! Your restaurant will be created with the {templates.find(t => t.id === selectedTemplate)?.name || 'selected template'} menu structure.
                       </span>
                     )}
                   </p>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3 max-h-64 sm:max-h-80 overflow-y-auto">
                     {/* Start from Scratch Option */}
                     <div 
-                      className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                      className={`p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all ${
                         selectedTemplate === null
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                       }`}
                       onClick={() => setSelectedTemplate(null)}
                     >
-                      <div className="flex items-start space-x-3">
-                        <div className={`mt-1 w-4 h-4 rounded-full border-2 ${
+                      <div className="flex items-start space-x-2 sm:space-x-3">
+                        <div className={`mt-1 w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 ${
                           selectedTemplate === null
                             ? 'border-blue-500 bg-blue-500'
                             : 'border-gray-300 dark:border-gray-600'
                         }`}>
                           {selectedTemplate === null && (
-                            <div className="w-2 h-2 bg-white rounded-full ml-0.5 mt-0.5"></div>
+                            <div className="w-1 h-1 sm:w-2 sm:h-2 bg-white rounded-full ml-0.5 mt-0.5"></div>
                           )}
                         </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900 dark:text-white">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
                             Start from Scratch
                           </h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                             Create your restaurant with empty menu and customize everything yourself.
                           </p>
                         </div>
@@ -331,46 +331,48 @@ export default function SignUpPage() {
 
                     {/* Template Options */}
                     {templatesLoading ? (
-                      <div className="flex items-center justify-center py-8">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                        <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Loading templates...</span>
+                      <div className="flex items-center justify-center py-6 sm:py-8">
+                        <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-blue-500"></div>
+                        <span className="ml-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Loading templates...</span>
                       </div>
                     ) : (
                       templates.map((template) => (
                         <div
                           key={template.id}
-                          className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                          className={`p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all ${
                             selectedTemplate === template.id
                               ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                               : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                           onClick={() => setSelectedTemplate(template.id)}
                         >
-                          <div className="flex items-start space-x-3">
-                            <div className={`mt-1 w-4 h-4 rounded-full border-2 ${
+                          <div className="flex items-start space-x-2 sm:space-x-3">
+                            <div className={`mt-1 w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 ${
                               selectedTemplate === template.id
                                 ? 'border-blue-500 bg-blue-500'
                                 : 'border-gray-300 dark:border-gray-600'
                             }`}>
                               {selectedTemplate === template.id && (
-                                <div className="w-2 h-2 bg-white rounded-full ml-0.5 mt-0.5"></div>
+                                <div className="w-1 h-1 sm:w-2 sm:h-2 bg-white rounded-full ml-0.5 mt-0.5"></div>
                               )}
                             </div>
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-1">
-                                <h4 className="font-medium text-gray-900 dark:text-white">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start flex-col sm:flex-row sm:items-center sm:space-x-2 mb-1">
+                                <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-1 sm:mb-0">
                                   {template.name}
                                 </h4>
-                                {template.tags.map((tag) => (
-                                  <Badge key={tag} variant="secondary" className="text-xs">
-                                    {tag}
-                                  </Badge>
-                                ))}
+                                <div className="flex flex-wrap gap-1">
+                                  {template.tags.map((tag) => (
+                                    <Badge key={tag} variant="secondary" className="text-xs">
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
                               </div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2">
                                 {template.description}
                               </p>
-                              <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                              <div className="flex items-center flex-wrap gap-2 sm:gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>{template.preview.categoriesCount} categories</span>
                                 <span>{template.preview.dishesCount} dishes</span>
                                 <span>{template.preview.tablesCount} tables</span>
@@ -428,15 +430,17 @@ export default function SignUpPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-2.5 sm:py-3 rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Creating Account...
+                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white mr-2"></div>
+                    <span className="text-sm sm:text-base">Creating Account...</span>
                   </div>
                 ) : (
-                  selectedTemplate ? `Create with ${templates.find(t => t.id === selectedTemplate)?.name || 'Template'}` : 'Create Restaurant Account'
+                  <span className="text-sm sm:text-base">
+                    {selectedTemplate ? `Create with ${templates.find(t => t.id === selectedTemplate)?.name || 'Template'}` : 'Create Restaurant Account'}
+                  </span>
                 )}
               </Button>
 
