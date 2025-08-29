@@ -31,10 +31,7 @@ A modern, full-stack restaurant ordering system with QR code menus, built with N
 
 The system uses a comprehensive relational database schema designed for scalability:
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/hiufungleung/qrorder/blob/main/readme/de_schema_dark.svg" />
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/hiufungleung/qrorder/blob/main/readme/de_schema.svg" />
-</picture>
+![Database Schema](readme/db_schema_dark.svg)
 
 ### Core Entities:
 - **Restaurants** - Multi-tenant restaurant management with admin privileges
