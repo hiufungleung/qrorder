@@ -249,18 +249,7 @@ export async function DELETE(
       )
     }
 
-    // Check if category has dishes
-    const dishCount = await prisma.dishes.count({
-      where: { category_id: parseInt(categoryId) }
-    })
-
-    if (dishCount > 0) {
-      return NextResponse.json(
-        { status: 400, message: 'Cannot delete category with existing dishes' },
-        { status: 400 }
-      )
-    }
-
+    // Delete the category - Prisma will automatically set category_id to NULL for associated dishes
     await prisma.dish_categories.delete({
       where: { id: parseInt(categoryId) }
     })

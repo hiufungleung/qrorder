@@ -44,12 +44,12 @@ model dish_categories {
 
 model dishes {
   id                     Int                      @id @default(autoincrement())
-  category_id            Int
+  category_id            Int?
   dish_name              String                   @unique(map: "dishes_dish_name_key") @db.VarChar(255)
   description            String
   base_price             Decimal                  @db.Decimal(10, 2)
   dish_available_options dish_available_options[]
-  dish_categories        dish_categories          @relation(fields: [category_id], references: [id], onDelete: SetDefault, map: "dishes_category_id_fkey")
+  dish_categories        dish_categories?         @relation(fields: [category_id], references: [id], onDelete: SetNull, map: "dishes_category_id_fkey")
   order_details          order_details[]
 
   @@index([category_id], map: "dishes_category_id_idx")

@@ -666,6 +666,7 @@ export default function RestaurantDashboard() {
   const [editingTable, setEditingTable] = useState<RestaurantTable | null>(null)
   const [qrData, setQRData] = useState<{tableId: number, tableNumber: string, url: string, qrUrl: string} | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{show: boolean, type: string, id: number, name: string}>({show: false, type: '', id: 0, name: ''})
+  const [showCategoryDeleteConfirm, setShowCategoryDeleteConfirm] = useState<{show: boolean, categoryId: number, categoryName: string, dishCount: number}>({show: false, categoryId: 0, categoryName: '', dishCount: 0})
   const [showSuccessMessage, setShowSuccessMessage] = useState<{show: boolean, message: string}>({show: false, message: ''})
 
   const fetchRestaurantData = useCallback(async () => {
@@ -945,7 +946,44 @@ export default function RestaurantDashboard() {
   }
 
   const handleDeleteConfirm = (type: string, id: number, name: string) => {
-    setShowDeleteConfirm({show: true, type, id, name})
+    if (type === 'category') {
+      // Check if category has dishes
+      const dishCount = dishes.filter(dish => dish.category?.id === id).length
+      setShowCategoryDeleteConfirm({show: true, categoryId: id, categoryName: name, dishCount})
+    } else {
+      setShowDeleteConfirm({show: true, type, id, name})
+    }
+  }
+
+  const handleCategoryDelete = async () => {
+    const { categoryId } = showCategoryDeleteConfirm
+    try {
+      const response = await fetch(`/api/restaurants/${restaurantId}/categories?categoryId=${categoryId}`, {
+        method: 'DELETE'
+      })
+      
+      if (response.ok) {
+        // Update local state - remove category and set dishes' category to null
+        setDishCategories(categories => categories.filter(cat => cat.id !== categoryId))
+        setDishes(dishes => 
+          dishes.map(dish => 
+            dish.category?.id === categoryId 
+              ? { ...dish, category: null }
+              : dish
+          )
+        )
+        showSuccess('Category deleted successfully! Dishes have been uncategorized.')
+      } else {
+        const errorData = await response.json()
+        console.error('Failed to delete category:', errorData.message)
+        setError('Failed to delete category: ' + errorData.message)
+      }
+    } catch (error) {
+      console.error('Failed to delete category:', error)
+      setError('Failed to delete category')
+    } finally {
+      setShowCategoryDeleteConfirm({show: false, categoryId: 0, categoryName: '', dishCount: 0})
+    }
   }
 
   const handleDelete = async () => {
@@ -1232,7 +1270,7 @@ export default function RestaurantDashboard() {
                 <TableBody>
                   {dishes.map((dish) => (
                     <TableRow key={dish.id}>
-                      <TableCell>{dish.category?.category_name}</TableCell>
+                      <TableCell>{dish.category?.category_name || 'Uncategorized'}</TableCell>
                       <TableCell>{dish.dish_name}</TableCell>
                       <TableCell>{truncateText(dish.description)}</TableCell>
                       <TableCell>${dish.base_price}</TableCell>
@@ -1438,6 +1476,51 @@ export default function RestaurantDashboard() {
                   onClick={handleDelete}
                 >
                   Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Category Delete Confirmation Dialog */}
+      {showCategoryDeleteConfirm.show && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          onClick={() => setShowCategoryDeleteConfirm({show: false, categoryId: 0, categoryName: '', dishCount: 0})}
+        >
+          <div 
+            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-4">Delete Category</h3>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                Are you sure you want to delete the category "{showCategoryDeleteConfirm.categoryName}"?
+              </p>
+              {showCategoryDeleteConfirm.dishCount > 0 && (
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+                  <p className="text-yellow-800 dark:text-yellow-200 text-sm">
+                    <strong>Warning:</strong> This category contains {showCategoryDeleteConfirm.dishCount} dish{showCategoryDeleteConfirm.dishCount > 1 ? 'es' : ''}. 
+                    If you continue, those dish{showCategoryDeleteConfirm.dishCount > 1 ? 'es' : ''} will be moved to "Uncategorized".
+                  </p>
+                </div>
+              )}
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
+                This action cannot be undone.
+              </p>
+              <div className="flex justify-end gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowCategoryDeleteConfirm({show: false, categoryId: 0, categoryName: '', dishCount: 0})}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={handleCategoryDelete}
+                >
+                  Delete Category
                 </Button>
               </div>
             </div>

@@ -535,6 +535,7 @@ export default function OrderingPage() {
   
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
   const [categories, setCategories] = useState<MenuCategory[]>([])
+  const [tableName, setTableName] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [selectedDish, setSelectedDish] = useState<MenuDish | null>(null)
@@ -549,7 +550,8 @@ export default function OrderingPage() {
 
   useEffect(() => {
     fetchMenu()
-  }, [restaurantId])
+    fetchTableInfo()
+  }, [restaurantId, tableId])
 
   // Scroll listener to update active category based on current position
   useEffect(() => {
@@ -619,7 +621,7 @@ export default function OrderingPage() {
         // Check if button is outside the visible area
         if (buttonRect.left < containerRect.left || buttonRect.right > containerRect.right) {
           // Scroll the button into the center of the container
-          const scrollLeft = activeButton.offsetLeft - navContainer.offsetWidth / 2 + activeButton.offsetWidth / 2
+          const scrollLeft = (activeButton as HTMLElement).offsetLeft - (navContainer as HTMLElement).offsetWidth / 2 + (activeButton as HTMLElement).offsetWidth / 2
           navContainer.scrollTo({
             left: scrollLeft,
             behavior: 'smooth'
@@ -648,6 +650,21 @@ export default function OrderingPage() {
       setError('Failed to fetch menu')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchTableInfo = async () => {
+    try {
+      const response = await fetch(`/api/public/table/${tableId}`)
+      const data = await response.json()
+      
+      if (data.status === 200) {
+        setTableName(data.data.table_number)
+      }
+    } catch (error) {
+      console.error('Failed to fetch table info:', error)
+      // Fallback to showing table ID if API fails
+      setTableName(`${tableId}`)
     }
   }
 
@@ -741,17 +758,17 @@ export default function OrderingPage() {
               >
                 <span className="sr-only">Toggle navigation menu</span>
                 <div className="relative w-6 h-4 flex flex-col justify-between">
-                  <span className={`block h-0.5 w-full bg-current transition-all duration-300 ease-in-out transform-gpu ${
+                  <span className={`block h-0.5 w-full bg-gray-600 dark:bg-gray-300 transition-all duration-300 ease-in-out transform-gpu ${
                     showSidebar 
                       ? 'rotate-45 translate-y-[7px]' 
                       : 'rotate-0 translate-y-0'
                   }`} />
-                  <span className={`block h-0.5 w-full bg-current transition-all duration-300 ease-in-out transform-gpu ${
+                  <span className={`block h-0.5 w-full bg-gray-600 dark:bg-gray-300 transition-all duration-300 ease-in-out transform-gpu ${
                     showSidebar 
                       ? 'opacity-0 scale-x-0' 
                       : 'opacity-100 scale-x-100'
                   }`} />
-                  <span className={`block h-0.5 w-full bg-current transition-all duration-300 ease-in-out transform-gpu ${
+                  <span className={`block h-0.5 w-full bg-gray-600 dark:bg-gray-300 transition-all duration-300 ease-in-out transform-gpu ${
                     showSidebar 
                       ? '-rotate-45 -translate-y-[7px]' 
                       : 'rotate-0 translate-y-0'
@@ -760,7 +777,7 @@ export default function OrderingPage() {
               </button>
               <div>
                 <h1 className="text-lg sm:text-2xl font-bold dark:text-white line-clamp-1">{restaurant.name}</h1>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Table {tableId}</p>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Table {tableName || tableId}</p>
               </div>
             </div>
             <Button

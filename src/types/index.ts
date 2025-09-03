@@ -1,4 +1,6 @@
-import { OrderStatus } from '@prisma/client'
+import { order_status as OrderStatus } from '@prisma/client'
+
+export { OrderStatus }
 
 export interface Restaurant {
   id: number
@@ -20,11 +22,11 @@ export interface DishCategory {
 
 export interface Dish {
   id: number
-  category_id: number
+  category_id?: number | null
   dish_name: string
   description: string
   base_price: number
-  category?: DishCategory
+  category?: DishCategory | null
   availableOptions?: DishAvailableOption[]
 }
 
