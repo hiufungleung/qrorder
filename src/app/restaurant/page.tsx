@@ -124,7 +124,7 @@ function OptionModal({ isOpen, onClose, onSubmit, option = null }: {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const data = { 
+    const data: any = { 
       optionName: optionName, 
       values: values.filter(v => v.valueName) 
     }
@@ -239,7 +239,7 @@ function DishModal({ isOpen, onClose, onSubmit, categories, options, dish = null
         description: dish.description || '',
         basePrice: dish.base_price || 0,
         categoryId: dish.category?.id?.toString() || '',
-        selectedOptions: dish.availableOptions?.map(opt => opt.option.id) || []
+        selectedOptions: dish.availableOptions?.map(opt => opt.option?.id).filter(id => id !== undefined) || []
       })
     } else {
       setDishData({
@@ -256,7 +256,7 @@ function DishModal({ isOpen, onClose, onSubmit, categories, options, dish = null
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const data = { ...dishData }
+    const data: any = { ...dishData }
     if (dish) {
       data.dishId = dish.id
     }
@@ -422,7 +422,7 @@ function RestaurantProfileModal({ isOpen, onClose, onSubmit, restaurant = null, 
       return
     }
 
-    const data = {
+    const data: any = {
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
@@ -572,7 +572,7 @@ function TableModal({ isOpen, onClose, onSubmit, table = null }: {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const data = { ...tableData }
+    const data: any = { ...tableData }
     if (table) {
       data.tableId = table.id
     }
@@ -824,7 +824,7 @@ export default function RestaurantDashboard() {
           const dishWithCategory = {
             ...result.data,
             category: { id: category?.id, category_name: category?.category_name },
-            availableOptions: result.data.dish_available_options?.map(dao => ({
+            availableOptions: result.data.dish_available_options?.map((dao: any) => ({
               dish_id: result.data.id,
               option_id: dao.customisation_options?.id,
               option: {
@@ -844,7 +844,7 @@ export default function RestaurantDashboard() {
           const dishWithCategory = {
             ...result.data,
             category: { id: category?.id, category_name: category?.category_name },
-            availableOptions: result.data.dish_available_options?.map(dao => ({
+            availableOptions: result.data.dish_available_options?.map((dao: any) => ({
               dish_id: result.data.id,
               option_id: dao.customisation_options?.id,
               option: {

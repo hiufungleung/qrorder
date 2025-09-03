@@ -39,23 +39,21 @@ export async function GET(request: NextRequest, { params }: ExportParams) {
       where: { id: restaurantId },
       include: {
         dish_categories: {
-          orderBy: { id: 'asc' },
+          include: {
+            dishes: {
+              include: {
+                dish_available_options: {
+                  include: { customisation_options: true }
+                }
+              }
+            }
+          },
+          orderBy: { id: 'asc' }
         },
         customisation_options: {
           include: {
             option_values: {
               orderBy: { id: 'asc' }
-            }
-          },
-          orderBy: { id: 'asc' }
-        },
-        dishes: {
-          include: {
-            dish_categories: true,
-            dish_available_options: {
-              include: {
-                customisation_options: true
-              }
             }
           },
           orderBy: { id: 'asc' }
@@ -111,41 +109,43 @@ export async function GET(request: NextRequest, { params }: ExportParams) {
         phone: restaurant.phone || "",
         isAdmin: restaurant.is_admin
       },
-      customisation_options: restaurant.customisation_options.map(option => ({
+      customisation_options: (restaurant as any).customisation_options.map((option: any) => ({
         name: option.option_name,
-        values: option.option_values.map(value => ({
+        values: option.option_values.map((value: any) => ({
           name: value.value_name,
           extra_price: parseFloat(value.extra_price.toString())
         }))
       })),
-      categories: restaurant.dish_categories.map(category => ({
+      categories: (restaurant as any).dish_categories.map((category: any) => ({
         name: category.category_name,
         description: category.description || ""
       })),
-      dishes: restaurant.dishes.map(dish => ({
-        name: dish.dish_name,
-        description: dish.description || "",
-        base_price: parseFloat(dish.base_price.toString()),
-        category: dish.dish_categories.category_name,
-        available_options: dish.dish_available_options.map(opt => 
-          opt.customisation_options.option_name
-        )
-      })),
-      tables: restaurant.tables.map(table => ({
+      dishes: (restaurant as any).dish_categories.flatMap((category: any) => 
+        category.dishes.map((dish: any) => ({
+          name: dish.dish_name,
+          description: dish.description || "",
+          base_price: parseFloat(dish.base_price.toString()),
+          category: category.category_name,
+          available_options: dish.dish_available_options.map((opt: any) => 
+            opt.customisation_options.option_name
+          )
+        }))
+      ),
+      tables: (restaurant as any).tables.map((table: any) => ({
         table_number: table.table_number,
         capacity: table.capacity
       })),
       ...(includeOrders && {
-        sample_orders: restaurant.orders.map(order => ({
+        sample_orders: (restaurant as any).orders.map((order: any) => ({
           customer_name: order.customer_name,
           table_number: order.tables.table_number,
           status: order.status,
           comment: order.comment,
           order_time: order.order_time.toISOString(),
-          items: order.order_details.map(detail => ({
+          items: order.order_details.map((detail: any) => ({
             dish_name: detail.dishes.dish_name,
             quantity: detail.quantity,
-            customizations: detail.order_detail_customisation_options.map(opt => ({
+            customizations: detail.order_detail_customisation_options.map((opt: any) => ({
               option: opt.option_values.customisation_options?.option_name || "Unknown",
               value: opt.option_values.value_name
             }))

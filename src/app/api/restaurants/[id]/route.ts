@@ -69,7 +69,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Params }
+  { params }: { params: Promise<Params> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -81,7 +81,7 @@ export async function PUT(
       )
     }
 
-    const restaurantId = parseInt(params.id)
+    const restaurantId = parseInt((await params).id)
 
     // Check access permissions - allow admins or restaurant owners
     if (!session.user.isAdmin && session.user.restaurantId !== restaurantId) {
@@ -159,7 +159,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Params }
+  { params }: { params: Promise<Params> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -171,7 +171,7 @@ export async function DELETE(
       )
     }
 
-    const restaurantId = parseInt(params.id)
+    const restaurantId = parseInt((await params).id)
 
     await prisma.restaurants.delete({
       where: { id: restaurantId }

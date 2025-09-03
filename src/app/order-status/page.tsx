@@ -212,7 +212,7 @@ export default function OrderStatusPage() {
                 {/* Order Items */}
                 <div>
                   <h3 className="font-medium mb-3 text-gray-900 dark:text-white">Items Ordered</h3>
-                  {order.order_details && formatOrderItems(order.order_details)}
+                  {order.orderDetails && formatOrderItems(order.orderDetails)}
                 </div>
 
                 {/* Order Comment */}

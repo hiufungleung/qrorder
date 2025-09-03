@@ -62,7 +62,7 @@ function RestaurantEditModal({ isOpen, onClose, onSubmit, restaurant = null }: {
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               {restaurant ? 'Edit Restaurant' : 'Add Restaurant'}
             </h2>
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
               <X className="h-5 w-5" />
             </button>
           </div>

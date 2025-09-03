@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { OrderStatus } from '@prisma/client'
+import { order_status as OrderStatus } from '@prisma/client'
 
 interface Params {
   id: string
@@ -10,7 +10,7 @@ interface Params {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Params }
+  { params }: { params: Promise<Params> }
 ) {
   try {
     const session = await getServerSession(authOptions)

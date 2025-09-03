@@ -95,8 +95,7 @@ jobs:
 
             # Health check: wait for app to be ready
             for i in {1..30}; do
-              if docker run --rm --network web curlimages/curl:8.8.0 \
-                   -fsS "http://$CONTAINER:$PORT/" >/dev/null; then
+              if docker exec "$CONTAINER" curl -fsS "http://localhost:$PORT/" >/dev/null 2>&1; then
                 echo "UP"; break
               fi
               sleep 2

@@ -293,7 +293,7 @@ export async function POST(request: NextRequest) {
               customer_name: order.customer_name,
               total_price: 0, // Will be calculated below
               order_time: new Date(order.order_time),
-              status: order.status,
+              status: order.status as any,
               comment: order.comment || null,
               restaurant_id: newRestaurant.id,
               table_id: tableId

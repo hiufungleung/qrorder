@@ -17,7 +17,7 @@ export default function HomePage() {
     
     if (session) {
       // Redirect signed-in users based on their role
-      if (session.user.is_admin) {
+      if (session.user.isAdmin) {
         router.push('/admin')
       } else {
         router.push('/restaurant')

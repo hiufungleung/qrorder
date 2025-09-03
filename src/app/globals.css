@@ -45,28 +45,26 @@
   --font-sans: var(--font-montserrat);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1f2937;
-    --foreground: #f9fafb;
-    --card: #374151;
-    --card-foreground: #f9fafb;
-    --popover: #374151;
-    --popover-foreground: #f9fafb;
-    --primary: #818cf8;
-    --primary-foreground: #0f172a;
-    --secondary: #4b5563;
-    --secondary-foreground: #f3f4f6;
-    --muted: #4b5563;
-    --muted-foreground: #d1d5db;
-    --accent: #fbbf24;
-    --accent-foreground: #1c1917;
-    --destructive: #f87171;
-    --destructive-foreground: #f1f5f9;
-    --border: #4b5563;
-    --input: #4b5563;
-    --ring: #818cf8;
-  }
+.dark {
+  --background: #1f2937;
+  --foreground: #f9fafb;
+  --card: #374151;
+  --card-foreground: #f9fafb;
+  --popover: #374151;
+  --popover-foreground: #f9fafb;
+  --primary: #818cf8;
+  --primary-foreground: #0f172a;
+  --secondary: #4b5563;
+  --secondary-foreground: #f3f4f6;
+  --muted: #4b5563;
+  --muted-foreground: #d1d5db;
+  --accent: #fbbf24;
+  --accent-foreground: #1c1917;
+  --destructive: #f87171;
+  --destructive-foreground: #f1f5f9;
+  --border: #4b5563;
+  --input: #4b5563;
+  --ring: #818cf8;
 }
 
 * {
