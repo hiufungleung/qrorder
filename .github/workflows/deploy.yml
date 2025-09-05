@@ -139,9 +139,19 @@ jobs:
                 break
               fi
               
-              # Try health check inside the container
-              if docker exec "$CONTAINER" wget -q --spider "http://localhost:$PORT/" 2>/dev/null || \
-                 docker exec "$CONTAINER" wget -q --spider "http://localhost:$PORT/api/health" 2>/dev/null; then
+              # Check if the application is responding using Node.js
+              if docker exec "$CONTAINER" node -e "
+                const http = require('http');
+                const options = { hostname: 'localhost', port: $PORT, path: '/', timeout: 2000 };
+                const req = http.request(options, (res) => {
+                  console.log('OK');
+                  process.exit(0);
+                });
+                req.on('error', () => process.exit(1));
+                req.on('timeout', () => process.exit(1));
+                req.setTimeout(2000);
+                req.end();
+              " 2>/dev/null; then
                 echo "✅ Application is healthy and responding"
                 HEALTH_CHECK_PASSED=true
                 break
