@@ -2,12 +2,10 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 
-type Theme = 'dark' | 'light' | 'system'
+type Theme = 'system'
 
 type ThemeProviderProps = {
   children: React.ReactNode
-  defaultTheme?: Theme
-  storageKey?: string
 }
 
 type ThemeProviderState = {
@@ -24,11 +22,8 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'system',
-  storageKey = 'vite-ui-theme',
   ...props
 }: ThemeProviderProps) {
-  // Force system theme always
   const [theme] = useState<Theme>('system')
 
   useEffect(() => {

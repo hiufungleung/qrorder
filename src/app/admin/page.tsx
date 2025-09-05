@@ -269,7 +269,7 @@ export default function AdminPage() {
 
         {/* Error Display */}
         {error && (
-          <div className="p-4 text-sm text-red-500 bg-red-50 border border-red-200 rounded-md">
+          <div className="p-4 text-sm text-red-700 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-md">
             {error}
           </div>
         )}
@@ -313,8 +313,8 @@ export default function AdminPage() {
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs ${
                           restaurant.is_admin 
-                            ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-gray-100 text-gray-800'
+                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' 
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
                         }`}>
                           {restaurant.is_admin ? 'Yes' : 'No'}
                         </span>

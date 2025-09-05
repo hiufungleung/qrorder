@@ -2,22 +2,18 @@ name: Build & Deploy QR Order System
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 # All environment variables are set in GitHub repository → Settings → Secrets and variables → Actions → Variables
 # Required Variables: IMAGE_NAME, IMAGE_TAG, APP_PORT, CONTAINER_NAME, DOCKER_USERNAME, EC2_HOST, EC2_USER, NEXTAUTH_URL
 
-concurrency:
-  group: deploy-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     outputs:
-      digest:     ${{ steps.build.outputs.digest }}     # image digest（單架構也會有）
-      image_ref:  ${{ steps.meta.outputs.image_ref }}
+      digest: ${{ steps.build.outputs.digest }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,24 +27,34 @@ jobs:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Compose image ref
+      - name: Extract metadata
         id: meta
-        run: echo "image_ref=${{ vars.IMAGE_NAME }}:${{ vars.IMAGE_TAG }}" >> "$GITHUB_OUTPUT"
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build & Push (amd64) to Docker Hub
         id: build
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64
+          platforms: linux/amd64, linux/arm64
           push: true
-          tags: |
-            ${{ vars.IMAGE_NAME }}:${{ vars.IMAGE_TAG }}
-            ${{ vars.IMAGE_NAME }}:${{ github.sha }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: build
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.2.0
@@ -59,30 +65,59 @@ jobs:
           script: |
             set -euo pipefail
 
+            # Configuration & Validation
             CONTAINER=${{ vars.CONTAINER_NAME }}
             PORT=${{ vars.APP_PORT }}
-
             IMAGE_NAME="${{ vars.IMAGE_NAME }}"
             RAW_DIGEST="${{ needs.build.outputs.digest }}"
             DIGEST="$(printf '%s' "$RAW_DIGEST" | tr -d '\r\n')"
 
+            # Validate required variables
+            if [ -z "$CONTAINER" ] || [ -z "$PORT" ] || [ -z "$IMAGE_NAME" ]; then
+              echo "❌ Error: Missing required environment variables"
+              echo "CONTAINER: ${CONTAINER:-'NOT SET'}"
+              echo "PORT: ${PORT:-'NOT SET'}"
+              echo "IMAGE_NAME: ${IMAGE_NAME:-'NOT SET'}"
+              exit 1
+            fi
+
+            # Determine image reference
             if [ -n "$DIGEST" ]; then
               IMAGE_REF="${IMAGE_NAME}@${DIGEST}"
             else
               IMAGE_REF="${IMAGE_NAME}:${{ github.sha }}"
             fi
-            echo "Using image: $IMAGE_REF"
+            echo "🚀 Deploying image: $IMAGE_REF"
 
-            # Login on EC2 (needed if repo is private)
+            # Docker login
+            echo "🔐 Logging into Docker Hub..."
             echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ vars.DOCKER_USERNAME }}" --password-stdin
+            echo "✅ Docker login successful"
 
-            # Ensure the app network exists (shared with Nginx)
-            docker network inspect web >/dev/null 2>&1 || docker network create web
+            # Ensure network exists
+            echo "🌐 Ensuring web network exists..."
+            if ! docker network inspect web >/dev/null 2>&1; then
+              docker network create web
+              echo "✅ Created web network"
+            else
+              echo "✅ Web network already exists"
+            fi
 
-            # Replace old container
+            # Stop and remove old container
+            echo "🔄 Stopping old container..."
+            if docker ps -q -f name="$CONTAINER" | grep -q .; then
+              docker stop "$CONTAINER"
+              echo "✅ Stopped old container"
+            fi
             docker rm -f "$CONTAINER" 2>/dev/null || true
-            docker pull "$IMAGE_REF"
 
+            # Pull new image
+            echo "📥 Pulling new image..."
+            docker pull "$IMAGE_REF"
+            echo "✅ Image pulled successfully"
+
+            # Start new container
+            echo "🚀 Starting new container..."
             docker run -d --name "$CONTAINER" \
               --network web \
               -e HOSTNAME=0.0.0.0 \
@@ -92,14 +127,38 @@ jobs:
               -e NEXTAUTH_URL="${{ vars.NEXTAUTH_URL }}" \
               --restart unless-stopped \
               "$IMAGE_REF"
+            echo "✅ Container started"
 
-            # Health check: wait for app to be ready
+            # Health check
+            echo "🏥 Performing health check..."
+            HEALTH_CHECK_PASSED=false
             for i in {1..30}; do
-              if docker exec "$CONTAINER" curl -fsS "http://localhost:$PORT/" >/dev/null 2>&1; then
-                echo "UP"; break
+              # Check if container is running
+              if ! docker ps -q -f name="$CONTAINER" | grep -q .; then
+                echo "❌ Container is not running"
+                break
               fi
+              
+              # Try health check inside the container
+              if docker exec "$CONTAINER" wget -q --spider "http://localhost:$PORT/" 2>/dev/null || \
+                 docker exec "$CONTAINER" wget -q --spider "http://localhost:$PORT/api/health" 2>/dev/null; then
+                echo "✅ Application is healthy and responding"
+                HEALTH_CHECK_PASSED=true
+                break
+              fi
+              echo "⏳ Attempt $i/30: Application not ready yet, waiting 2s..."
               sleep 2
             done
 
-            # Delete old images to save space
+            if [ "$HEALTH_CHECK_PASSED" != "true" ]; then
+              echo "❌ Health check failed - checking container status and logs:"
+              docker ps -a -f name="$CONTAINER"
+              echo "--- Container Logs ---"
+              docker logs "$CONTAINER" --tail 50
+              exit 1
+            fi
+
+            # Cleanup
+            echo "🧹 Cleaning up old images..."
             docker image prune -f
+            echo "✅ Deployment completed successfully!"

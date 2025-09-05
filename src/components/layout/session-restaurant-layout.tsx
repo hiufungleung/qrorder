@@ -54,7 +54,7 @@ export function SessionRestaurantLayout({ children }: SessionRestaurantLayoutPro
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar />
       <main className="container mx-auto py-6 px-4">
         {children}

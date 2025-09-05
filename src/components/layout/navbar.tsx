@@ -31,7 +31,7 @@ export function Navbar() {
   }
 
   return (
-    <nav className="border-b bg-background">
+    <nav className="border-b bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center space-x-6">

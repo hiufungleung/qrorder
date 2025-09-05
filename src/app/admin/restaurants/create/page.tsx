@@ -102,7 +102,7 @@ export default function CreateRestaurantPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="p-3 text-sm text-red-500 bg-red-50 border border-red-200 rounded-md">
+                <div className="p-3 text-sm text-red-700 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-md">
                   {error}
                 </div>
               )}
